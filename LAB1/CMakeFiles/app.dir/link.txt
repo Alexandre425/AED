@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -ansi -O3  -rdynamic CMakeFiles/app.dir/source/connectivity.c.o CMakeFiles/app.dir/source/labconn.c.o  -o app 

@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alexandre/Desktop/C Projects/aed/LAB1/source/connectivity.c
+stdio.h
+-
+stdlib.h
+-
+connectivity.h
+/home/alexandre/Desktop/C Projects/aed/LAB1/source/connectivity.h
+
+/home/alexandre/Desktop/C Projects/aed/LAB1/source/connectivity.h
+
+/home/alexandre/Desktop/C Projects/aed/LAB1/source/labconn.c
+stdlib.h
+-
+stdio.h
+-
+unistd.h
+-
+connectivity.h
+/home/alexandre/Desktop/C Projects/aed/LAB1/source/connectivity.h
+

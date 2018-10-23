@@ -1,0 +1,3 @@
+/home/alexandre/Desktop/C Projects/aed/LAB1/CMakeFiles/rebuild_cache.dir
+/home/alexandre/Desktop/C Projects/aed/LAB1/CMakeFiles/app.dir
+/home/alexandre/Desktop/C Projects/aed/LAB1/CMakeFiles/edit_cache.dir

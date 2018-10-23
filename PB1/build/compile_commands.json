@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/alexandre/Desktop/C Projects/aed/PB1/build",
+  "command": "/usr/bin/cc     -g   -o CMakeFiles/app.dir/source/PB1.c.o   -c \"/home/alexandre/Desktop/C Projects/aed/PB1/source/PB1.c\"",
+  "file": "/home/alexandre/Desktop/C Projects/aed/PB1/source/PB1.c"
+}
+]
