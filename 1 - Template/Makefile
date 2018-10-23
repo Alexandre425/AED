@@ -1,25 +1,27 @@
 #compiler used
-COMPILER = gcc
+CC = gcc
 
 #flags for individual object file compilation
-DEVFLAGS = -Wall -ansi -g
-RELFLAGS = -Wall -ansi -O3
+CFLAGS = -Wall -ansi -g
+#RELEASE
+# -Wall -ansi -O3
+#DEVELOPMENT
+# -Wall -ansi -g
 
-#source foo.c files
-SOURCE = 
+#source .c files
+SOURCE = $(wildcard src/*.c)
 #object files created
-OBJECTS = $(SOURCES:.c=.o)
+OBJECTS = $(patsubst src/%.c,bin/%.o,$(SOURCE))
 
 #executable name
 EXECUTABLE = app
 
+############################################################
 
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(COMPILER) $(DEVFLAGS) -o $(EXECUTABLE) $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJECTS)
 
-
-
-
-
+bin/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
