@@ -75,5 +75,7 @@ M=22
 t33:
 	echo $N $M | ./p3-pub
 
+t34:
+	echo 64 64 | ./p3-pub
 
 # DO NOT DELETE

@@ -154,8 +154,21 @@ char *bn_BinStrfromBN(BigNum *bn) {
 
 BigNum *bn_symmetric(BigNum *x) {
   BigNum *bn;
+  BitB *x_aux = x->bits, *aux;
 
-  /* ... */
+  bn = malloc(sizeof(BigNum));
+  bn->bits = malloc(sizeof(BitB));
+  aux = bn->bits;
+  aux->nbit = NULL;
+
+  while (x_aux != NULL){
+    aux->bit = !(x_aux->bit);
+    aux->nbit = malloc(sizeof(BitB));
+    aux->nbit->nbit = NULL;
+
+    x_aux = x_aux->nbit;
+    aux = aux->nbit;
+  }
 
   return(bn);
 }
@@ -194,24 +207,26 @@ int bn_isZero(BigNum *x) {
  *****************************************************************************/
 
 int bn_compare(BigNum *x, BigNum *y) {
-  BitB *x_aux, *y_aux;
-  int result;
-  int equal = 1, more = 1, less = 1;
+  BitB *x_aux = x->bits, *y_aux = y->bits;
+  int result = 0;
   int x_count = 0, y_count = 0;
 
-  while (x_aux != NULL){
-    
-  }
+  while (x_aux != NULL && y_aux != NULL){
+    if (x_aux->bit > y_aux->bit)
+      result = 1;
+    else if (x_aux->bit < y_aux->bit)
+      result = -1;
 
-  while (x_aux != NULL || x_aux != NULL){
-
-    
-
-    if (x_aux != NULL)
       x_aux = x_aux->nbit;
-    if (y_aux != NULL)
       y_aux = y_aux->nbit;
-  }
+    }
+
+    if (x_aux == NULL && y_aux != NULL)
+      result = -1;
+
+    if (y_aux == NULL && x_aux != NULL)
+      result = 1;
+
 
   return(result);
 }

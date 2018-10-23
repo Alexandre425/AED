@@ -69,10 +69,16 @@ int main(void)
 
   /* now do some operations with x and y */
 
-  /* x+y?  x>y?  x*y?  ... */
-
   res = bn_add(x, y);
-  printf("%s + %s = \n%s\n", BinStr2DecStr(bn_BinStrfromBN(x)), BinStr2DecStr(bn_BinStrfromBN(y)), BinStr2DecStr(bn_BinStrfromBN(res)));
+  printf("%s + %s = \n%s\n\n", BinStr2DecStr(bn_BinStrfromBN(x)), BinStr2DecStr(bn_BinStrfromBN(y)), BinStr2DecStr(bn_BinStrfromBN(res)));
+
+  ret = bn_compare(x, y);
+  if (ret == 1) printf("x > y\n\n");
+  else if (ret == 0) printf("x = y\n\n");
+  else printf("x < y\n\n");
+
+  res = bn_symmetric(x);
+  printf("symetric of x: %s\n\n", BinStr2DecStr(bn_BinStrfromBN(res)));
 
   /* freeing used memory */
   free(d1str);
