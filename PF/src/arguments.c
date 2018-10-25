@@ -13,7 +13,7 @@
 
 void arguments_check(int argc, char *argv[ ]){
     
-    char arguments[2][10] = {"./tuktuk\0", ".cities\0"};
+    char arguments[2][10] = {"/tuktuk\0", ".cities\0"};
     
     if(argc != 2){
         exit(0);
