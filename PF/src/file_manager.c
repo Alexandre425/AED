@@ -1,14 +1,12 @@
 #include "file_manager.h"
 
-
 /******************************************************************************
- * solution_problemA()
+ * file_readPuzzles()
  *
- * Arguments:
- * Returns:
- * Side-Effects:
- *
- * Description:
+ * Arguments:   argv - runtime arguments, contains filename
+ * Returns: the newly created puzzle box, filled with all the read puzzles
+ * 
+ * Description: reads, validates and stores the puzzles in the foo.cities file
  *
  *****************************************************************************/
 puzzlesBox* file_readPuzzles(char *argv[])
@@ -19,7 +17,7 @@ puzzlesBox* file_readPuzzles(char *argv[])
     int i = 0, j = 0;
     puzzleInfo *puzzle = NULL; 
     puzzlesBox *box =NULL;
-    
+
     fp = fopen(argv[1], "r");
     if (fp == NULL){
         printf("Cannot open file!\n");
@@ -53,7 +51,7 @@ puzzlesBox* file_readPuzzles(char *argv[])
                 }
             }
             
-            puzzle_storePuzzle(puzzle,box);
+            puzzle_storePuzzle(puzzle, box);
             puzzle = puzzle_initPuzzle();           
         }
     }
@@ -64,25 +62,15 @@ puzzlesBox* file_readPuzzles(char *argv[])
 }
 
 /******************************************************************************
- * solution_problemA()
+ * file_writeSolution()
  *
- * Arguments:
- * Returns:
- * Side-Effects:
+ * Arguments:   solution - solution string
+ * Side-Effects: closes the file if the solution is NULL
  *
- * Description:
+ * Description: writes the solution to a puzzle to the solution file. if this
+ *              does not exist, opens the file
  *
  *****************************************************************************/
-FILE* file_writeSolution(FILE *fp, char* solution, char* argv[]){
-    if (fp == NULL){
-        char* token;
-        char* fileName;
-        token = strtok(argv[1], ".");
-        fileName = strcat(token, ".solution");
-        fopen(fileName, "w");
-    }
-
-    fprintf(fp, "%s\n", solution);
-
-    return fp;
+void file_writeSolution(char* solution, FILE* fp){
+    fprintf(fp, "%s", solution);
 }

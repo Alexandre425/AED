@@ -18,7 +18,7 @@ int main (int argc, char *argv[]){
 
     box = file_readPuzzles(argv);
     
-    solution_solvePuzzleBox(box);
+    solution_solvePuzzleBox(box, argv);
     
     box = puzzle_freePuzzlesBox(box);
     

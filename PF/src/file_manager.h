@@ -7,4 +7,4 @@
 
 puzzlesBox* file_readPuzzles(char *argv[]);
 
-FILE *file_writeSolution(FILE* fp, char* solutionString, char* argv[]);
+void file_writeSolution(char* solutionString, FILE* fp);

@@ -9,10 +9,10 @@ vec* possibleMoves[8];
  *
  * Description: solves all the puzzles in the puzzle box;
  *****************************************************************************/
-void solution_solvePuzzleBox(puzzlesBox* box){
+void solution_solvePuzzleBox(puzzlesBox* box, char* argv[]){
     int i;
-    puzzleInfo* puzzle = NULL;
 
+    puzzleInfo* puzzle = NULL;
     possibleMoves[0] = vec_create( 1, 2);
     possibleMoves[1] = vec_create( 1,-2);
     possibleMoves[2] = vec_create(-1, 2);
@@ -22,20 +22,32 @@ void solution_solvePuzzleBox(puzzlesBox* box){
     possibleMoves[6] = vec_create(-2, 1);
     possibleMoves[7] = vec_create(-2,-1);
 
+    FILE* fp = NULL;
+    char* token;
+    char* fileName;
+    token = strtok(argv[1], ".");
+    fileName = strcat(token, ".valid");
+    fp = fopen(fileName, "w");
+    if (fp == NULL){
+        printf("File could not be opened\n");
+        exit(-1);
+    }
+
     for (i = 0; i < puzzle_getNPuzzles(box); i++){
         puzzle = puzzle_getPuzzleFromBox(box, i);
         switch (puzzle_getProblemType(puzzle)){
             case 'A':
-                solution_problemA(puzzle);
+                solution_problemA(puzzle, fp);
                 break;
             case 'B':
-                solution_problemB(puzzle);
+                solution_problemB(puzzle, fp);
                 break;
         }
     }
 
     for (i = 0; i < 8; i++)
         free(possibleMoves[i]);
+    fclose(fp);
 }
 
 /******************************************************************************
@@ -64,29 +76,40 @@ int solution_checkBounds(puzzleInfo* puzzle, vec* pos){
  * 
  * Description: solves a puzzle of the 'A' problem type
  *****************************************************************************/
-void solution_problemA(puzzleInfo* puzzle){
-    char* solution;
-    char* buffer;
+void solution_problemA(puzzleInfo* puzzle, FILE* fp){
+    char solution[64];
     int i = 0;
     int bestCost = 0, cost = 0;
+    int solutionExists = -1;
 
     vec* sum = vec_create(0, 0);
 
-    for(i = 0; i < 8; i++){
-        vec_sum(sum, puzzle_getTouristicPoint(puzzle,0), possibleMoves[i]);
-        if(0 == solution_checkBounds(puzzle, sum)){
-            cost=puzzle_getTileCost(puzzle, sum);
-            if(cost != 0){
-                if(bestCost ==  0){
+    for (i = 0; i < 8; i++){
+        vec_sum(sum, puzzle_getTouristicPoint(puzzle, 0), possibleMoves[i]);
+        if (0 == solution_checkBounds(puzzle, sum)){
+            cost = puzzle_getTileCost(puzzle, sum);
+            if (cost != 0){
+                if (bestCost == 0)
                     bestCost = cost;
-                }
-                else if(bestCost > cost){
+                else if (bestCost > cost)
                     bestCost = cost;
-                } 
             }                
         }     
     } 
-    printf("best cost is %d \n",bestCost);   
+
+    if (bestCost != 0)
+        solutionExists = 1;
+
+    sprintf(solution, "%d %d %c %d %d %d\n\n", 
+        vec_x(puzzle_getCityDimensions(puzzle)),
+        vec_y(puzzle_getCityDimensions(puzzle)),
+        puzzle_getProblemType(puzzle),
+        puzzle_getNPoints(puzzle),
+        solutionExists,
+        bestCost
+        );
+
+    file_writeSolution(solution, fp);
 }
 
 /******************************************************************************
@@ -96,7 +119,7 @@ void solution_problemA(puzzleInfo* puzzle){
  * 
  * Description: solves a puzzle of the 'B' problem type
  *****************************************************************************/
-void solution_problemB(puzzleInfo* puzzle){
+void solution_problemB(puzzleInfo* puzzle, FILE* fp){
 
 }
 /******************************************************************************
@@ -106,7 +129,7 @@ void solution_problemB(puzzleInfo* puzzle){
  * 
  * Description: turn an int into a string
  *****************************************************************************/
-char* solution_convertIntChar(int number  ){
+char* solution_convertIntChar(int number){
     int strSize = 0;
     int i = 0;
     char* nstring = NULL;
