@@ -28,3 +28,5 @@ int puzzle_getNPoints(puzzleInfo* puzzle);
 vec* puzzle_getCityDimensions(puzzleInfo* puzzle);
 vec* puzzle_getTouristicPoint(puzzleInfo* puzzle, int index);
 int puzzle_getTileCost(puzzleInfo* puzzle, vec* position);
+int puzzle_getNPuzzles(puzzlesBox* box);
+puzzleInfo* puzzle_getPuzzleFromBox(puzzlesBox* box, int index)

@@ -1,5 +1,16 @@
 #include "file_manager.h"
 
+
+/******************************************************************************
+ * solution_problemA()
+ *
+ * Arguments:
+ * Returns:
+ * Side-Effects:
+ *
+ * Description:
+ *
+ *****************************************************************************/
 puzzlesBox* file_readPuzzles(char *argv[]){
     
     FILE *fp = NULL;
@@ -51,7 +62,26 @@ puzzlesBox* file_readPuzzles(char *argv[]){
     return box;
 }
 
-void file_writeSolution(FILE *fp, puzzlesBox* box){
+/******************************************************************************
+ * solution_problemA()
+ *
+ * Arguments:
+ * Returns:
+ * Side-Effects:
+ *
+ * Description:
+ *
+ *****************************************************************************/
+FILE* file_writeSolution(FILE *fp, char* solution, char* argv[]){
+    if (fp == NULL){
+        char* token;
+        char* fileName;
+        token = strtok(argv[1], ".");
+        fileName = strcat(token, ".solution");
+        fopen(fileName, "w");
+    }
 
+    fprintf(fp, "%s\n", solution);
 
+    return fp;
 }

@@ -12,7 +12,6 @@ typedef struct _puzzleInfo{
 typedef struct _puzzlesBox{
     int nPuzzles;
     puzzleInfo **puzzles;
-    vec* possibleMoves[8]
 }puzzlesBox;
 
 /******************************************************************************
@@ -33,8 +32,6 @@ puzzlesBox* puzzle_initPuzzlesBox(){
         printf("Memory allocation error!\n");
         exit(0);
     }
-
-
 
     box->nPuzzles = 0;
     box->puzzles = NULL;
@@ -255,4 +252,12 @@ vec* puzzle_getTouristicPoint(puzzleInfo* puzzle, int i){
 
 int puzzle_getTileCost(puzzleInfo* puzzle, vec* pos){
     return puzzle->cityMap[vec_x(pos)][vec_y(pos)];
+}
+
+int puzzle_getNPuzzles(puzzlesBox* box){
+    return box->nPuzzles;
+}
+
+puzzleInfo* puzzle_getPuzzleFromBox(puzzlesBox* box, int i){
+    return box->puzzles[i];
 }
