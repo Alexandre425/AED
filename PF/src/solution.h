@@ -10,3 +10,6 @@ void solution_solvePuzzleBox(puzzlesBox* box);
 
 void solution_problemA(puzzleInfo* puzzle);
 void solution_problemB(puzzleInfo* puzzle);
+
+char* solution_convertIntChar(int number);
+

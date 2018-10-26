@@ -66,15 +66,27 @@ int solution_checkBounds(puzzleInfo* puzzle, vec* pos){
  *****************************************************************************/
 void solution_problemA(puzzleInfo* puzzle){
     char* solution;
+    char* buffer;
     int i = 0;
+    int bestCost = 0, cost = 0;
+
     vec* sum = vec_create(0, 0);
 
     for(i = 0; i < 8; i++){
         vec_sum(sum, puzzle_getTouristicPoint(puzzle,0), possibleMoves[i]);
         if(0 == solution_checkBounds(puzzle, sum)){
-            puzzle_getTileCost(puzzle, sum);
-        }                     
-    }    
+            cost=puzzle_getTileCost(puzzle, sum);
+            if(cost != 0){
+                if(bestCost ==  0){
+                    bestCost = cost;
+                }
+                else if(bestCost > cost){
+                    bestCost = cost;
+                } 
+            }                
+        }     
+    } 
+    printf("best cost is %d \n",bestCost);   
 }
 
 /******************************************************************************
@@ -87,4 +99,26 @@ void solution_problemA(puzzleInfo* puzzle){
 void solution_problemB(puzzleInfo* puzzle){
 
 }
-
+/******************************************************************************
+ * solution_convertIntChar()
+ *
+ * Arguments:   number and a string pointer 
+ * 
+ * Description: turn an int into a string
+ *****************************************************************************/
+char* solution_convertIntChar(int number  ){
+    int strSize = 0;
+    int i = 0;
+    char* nstring = NULL;
+    while(number/10 !=0){
+        strSize++;
+    }
+    if(strSize != 0);
+    nstring = calloc(strSize+1,sizeof(char));
+    nstring[strSize] = '\0';
+    for(i = strSize-1; i >= 0; i++){
+        nstring[i] = number % 10;
+        number = number / 10;
+    }
+    return nstring; 
+}

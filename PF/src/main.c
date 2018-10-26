@@ -17,7 +17,9 @@ int main (int argc, char *argv[]){
         printf("%s\n", argv[i]);
 
     box = file_readPuzzles(argv);
-
+    
+    solution_solvePuzzleBox(box);
+    
     box = puzzle_freePuzzlesBox(box);
     
     return 0;
