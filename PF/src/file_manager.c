@@ -11,7 +11,8 @@
  * Description:
  *
  *****************************************************************************/
-puzzlesBox* file_readPuzzles(char *argv[]){
+puzzlesBox* file_readPuzzles(char *argv[])
+{
     
     FILE *fp = NULL;
     char buffer[1024];

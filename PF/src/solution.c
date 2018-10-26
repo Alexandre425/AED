@@ -70,13 +70,11 @@ void solution_problemA(puzzleInfo* puzzle){
     vec* sum = vec_create(0, 0);
 
     for(i = 0; i < 8; i++){
-        vec_sum(sum, puzzle_getTouristicPoints(puzzle), possibleMoves[i]);
-        if(1 == /*por criar*/puzzle_validatePoint(puzzle, sum)){
+        vec_sum(sum, puzzle_getTouristicPoint(puzzle,0), possibleMoves[i]);
+        if(0 == solution_checkBounds(puzzle, sum)){
             puzzle_getTileCost(puzzle, sum);
         }                     
-    }        
-
-    
+    }    
 }
 
 /******************************************************************************

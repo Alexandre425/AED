@@ -5,6 +5,7 @@
 #include "arguments.h"
 #include "puzzle.h"
 #include "file_manager.h"
+#include "solution.h"
 
 int main (int argc, char *argv[]){
 
