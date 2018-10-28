@@ -4,7 +4,7 @@
  * file_readPuzzles()
  *
  * Arguments:   argv - runtime arguments, contains filename
- * Returns: the newly created puzzle box, filled with all the read puzzles
+ * Returns:     the newly created puzzle box, filled with all the read puzzles
  * 
  * Description: reads, validates and stores the puzzles in the foo.cities file
  *
@@ -65,10 +65,8 @@ puzzlesBox* file_readPuzzles(char *argv[])
  * file_writeSolution()
  *
  * Arguments:   solution - solution string
- * Side-Effects: closes the file if the solution is NULL
  *
- * Description: writes the solution to a puzzle to the solution file. if this
- *              does not exist, opens the file
+ * Description: writes the solution to a puzzle to the solution file
  *
  *****************************************************************************/
 void file_writeSolution(char* solution, FILE* fp){

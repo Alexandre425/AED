@@ -7,10 +7,10 @@ typedef struct _vec vec;
 /* get */
 int vec_x(vec *vector);
 int vec_y(vec *vector);
-int vec_dist_squared(vec *vector_a, vec *vector_b);
 
 /* operate */
 void vec_sum(vec *sum_vector, vec *vector_a, vec *vector_b);
+int vec_dist_squared(vec *vector_a, vec *vector_b);
 int vec_cmp(vec* vector_a, vec* vector_b);
 
 /* set */

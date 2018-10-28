@@ -10,10 +10,14 @@ typedef struct _puzzlesBox puzzlesBox;
 puzzlesBox* puzzle_initPuzzlesBox();
 puzzleInfo* puzzle_initPuzzle();
 
-void puzzle_storePuzzle(puzzleInfo* puzzle, puzzlesBox* box);
-puzzleInfo* puzzle_freePuzzle(puzzleInfo* puzzle);
+/* free */
 puzzlesBox* puzzle_freePuzzlesBox(puzzlesBox* box);
+puzzleInfo* puzzle_freePuzzle(puzzleInfo* puzzle);
+
+/* utils */
+void puzzle_storePuzzle(puzzleInfo* puzzle, puzzlesBox* box);
 int puzzle_paremetersCheck(puzzleInfo* puzzle);
+
 
 /* set */
 void puzzle_setProblemType(puzzleInfo* puzzle, char type);

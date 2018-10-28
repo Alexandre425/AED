@@ -17,9 +17,7 @@ typedef struct _puzzlesBox{
 /******************************************************************************
  * puzzle_initPuzzlesBox()
  *
- * Arguments:
- * Returns: puzzlesBox* 
- * Side-Effects:
+ * Returns: the allocated puzzle box
  *
  * Description: initializes the puzzle box
  *
@@ -42,11 +40,9 @@ puzzlesBox* puzzle_initPuzzlesBox(){
 /******************************************************************************
  * puzzle_initPuzzle()
  *
- * Arguments:
- * Returns: puzzleInfo* 
- * Side-Effects:
+ * Returns: a newly allocated puzzle
  *
- * Description:
+ * Description: initializes a puzzle
  *
  *****************************************************************************/
 puzzleInfo* puzzle_initPuzzle(){
@@ -65,12 +61,12 @@ puzzleInfo* puzzle_initPuzzle(){
 /******************************************************************************
  * puzzle_storePuzzle()
  *
- * Arguments: puzzleInfo* puzzle ; puzzlesBox* box
- * Returns: 
- * Side-Effects: reallocates box->puzzle 
- *               puzzles become null 
+ * Arguments:   puzzle - a puzzle to be stored
+ *              box - a box for it to be stored in
+ * Side-Effects:    reallocates the box->puzzles array
+ *                  increments the number of puzzles
  *
- * Description: store a puzzle in the box
+ * Description: stores a puzzle in the box
  *
  *****************************************************************************/
 void puzzle_storePuzzle(puzzleInfo* puzzle, puzzlesBox* box){
@@ -88,11 +84,10 @@ void puzzle_storePuzzle(puzzleInfo* puzzle, puzzlesBox* box){
 /******************************************************************************
  * puzzle_freePuzzle()
  *
- * Arguments:puzzleInfo* puzzle
- * Returns: puzzleInfo* 
- * Side-Effects: return NULL
+ * Arguments:   puzzle - a puzzle to free
+ * Returns: NULL
  *
- * Description: free all the information in the Puzzles
+ * Description: free a puzzle and everything in it
  *
  *****************************************************************************/
 puzzleInfo* puzzle_freePuzzle(puzzleInfo* puzzle){
@@ -119,12 +114,10 @@ puzzleInfo* puzzle_freePuzzle(puzzleInfo* puzzle){
 /******************************************************************************
  * puzzle_freePuzzlesBox()
  *
- * Arguments:puzzlesBox* box
- * Returns: puzzlesBox* 
- * Side-Effects: return NULL
- *               free all the puzzles inside
+ * Arguments:   box - the box to be freed
+ * Returns: NULL
  *
- * Description: free all the information in the BoX
+ * Description: frees all the puzzles in the box, and then the box
  *
  *****************************************************************************/
 puzzlesBox* puzzle_freePuzzlesBox(puzzlesBox* box){
@@ -143,11 +136,13 @@ puzzlesBox* puzzle_freePuzzlesBox(puzzlesBox* box){
 /******************************************************************************
  * puzzle_paremetersCheck()
  *
- * Arguments: puzzleInfo* puzzle
- * Returns: int
- * Side-Effects: allocates memory for the city and the touristic points of the puzzle
+ * Arguments:   puzzle - the puzzle to be validated
+ * Returns:     0 - the puzzle is valid
+ *              -1 - the puzzle is invalid
+ * Side-Effects:    allocates memmory for the city map and touristic point array
+ *                  if validation occurs
  *
- * Description: decide if the data stored inside the puzzle is valid
+ * Description: check the data stored in a puzzle and decide if it is valid
  *
  *****************************************************************************/
 int puzzle_paremetersCheck(puzzleInfo* puzzle){
@@ -197,10 +192,9 @@ int puzzle_paremetersCheck(puzzleInfo* puzzle){
 /******************************************************************************
  * SETTING FUNCTIONS
  *
- * Arguments: variable to be set
- * Returns: 
+ * Arguments: variable to set a member to
  *
- * Description: sets a variable in a structure to the argument variable
+ * Description: sets a member of the structure as the argument variable
  *
  *****************************************************************************/
 

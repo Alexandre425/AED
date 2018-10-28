@@ -163,26 +163,3 @@ void solution_problemB(puzzleInfo* puzzle, FILE* fp){
 
     free(sum);
 }
-/******************************************************************************
- * solution_convertIntChar()
- *
- * Arguments:   number and a string pointer 
- * 
- * Description: turn an int into a string
- *****************************************************************************/
-char* solution_convertIntChar(int number){
-    int strSize = 0;
-    int i = 0;
-    char* nstring = NULL;
-    while(number/10 !=0){
-        strSize++;
-    }
-    if(strSize != 0);
-    nstring = calloc(strSize+1,sizeof(char));
-    nstring[strSize] = '\0';
-    for(i = strSize-1; i >= 0; i++){
-        nstring[i] = number % 10;
-        number = number / 10;
-    }
-    return nstring; 
-}
