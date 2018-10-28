@@ -33,7 +33,6 @@ int vec_y(vec *v){
  * Arguments:   s - the sum vector (a + b)
  *              a - vector
  *              b - vector
- * Returns:
  * Side-Effects: changes the values of s
  *
  * Description: calculates the sum of the vectors a and b. puts the result in s
@@ -68,13 +67,11 @@ vec* vec_create(int x, int y){
 }
 
 /******************************************************************************
- * vec_create()
+ * vec_set()
  *
  * Arguments:   v - vector
  *              x - x coordinate
  *              y - y coordinate
- * Returns: 
- * Side-Effects:
  *
  * Description: sets a vector's coordinates to the given coordinates
  *
@@ -90,11 +87,29 @@ void vec_set(vec* v, int x, int y){
  * Arguments:   v - vector
  *              u - vector
  * Returns: squared distance between vectors
- * Side-Effects:
  *
  * Description: gets the squared distance between two vectors
  *
  *****************************************************************************/
 int vec_dist_squared(vec* v, vec* u){
-    return (sqr(vec_x(v) - vec_x(u)) + sqr(vec_y(v) - vec_y(u)));
+    return (sqr(v->x - u->x) + sqr(v->y - u->y));
 }
+
+/******************************************************************************
+ * vec_cmp()
+ *
+ * Arguments:   v - vector
+ *              u - vector
+ * Returns: 0 - vectors are equal
+ *          -1 - vectors are not equal
+ *
+ * Description: compares two vectors to determine if they are equal
+ *
+ *****************************************************************************/
+int vec_cmp(vec* v, vec* u){
+    if (v->x == u->x && v->y == u->y)
+        return 0;
+    else
+        return -1;
+}
+

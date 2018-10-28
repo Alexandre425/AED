@@ -121,6 +121,47 @@ void solution_problemA(puzzleInfo* puzzle, FILE* fp){
  *****************************************************************************/
 void solution_problemB(puzzleInfo* puzzle, FILE* fp){
 
+    int i, j;
+    int totalCost = 0;
+    int valid;
+    vec* sum = vec_create(0, 0);
+    char solution[64];
+
+    for (i = 1; i < puzzle_getNPoints(puzzle); i++){
+        /* we assume the move is invalid */
+        valid = -1;
+        /* test all the possible moves */
+        for(j = 0; j < 8; j++){
+            vec_sum(sum, puzzle_getTouristicPoint(puzzle, i-1), possibleMoves[j]);
+            /* if one coincides with the next point */
+            if (solution_checkBounds(puzzle, sum) == 0 && 
+                vec_cmp(puzzle_getTouristicPoint(puzzle, i), sum) == 0){
+                /* move is valid, test the next move */
+                valid = 1;
+                totalCost += puzzle_getTileCost(puzzle, sum);
+                break;
+            }
+        }
+        /* if any one the moves tested is invalid, there is no need to test the othes */
+        if (valid == -1)
+            break;
+    }
+
+    /* as the cycle completes, we have our final answer */
+    if (valid == -1)
+        totalCost = 0;
+
+    sprintf(solution, "%d %d %c %d %d %d\n\n", 
+        vec_x(puzzle_getCityDimensions(puzzle)),
+        vec_y(puzzle_getCityDimensions(puzzle)),
+        puzzle_getProblemType(puzzle),
+        puzzle_getNPoints(puzzle),
+        valid,
+        totalCost
+        );
+    file_writeSolution(solution, fp);
+
+    free(sum);
 }
 /******************************************************************************
  * solution_convertIntChar()
