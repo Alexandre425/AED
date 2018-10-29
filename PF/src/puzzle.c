@@ -7,6 +7,7 @@ typedef struct _puzzleInfo{
     vec **touristicPoints;
     short **cityMap;
     char* solution;
+    short valid;
 }puzzleInfo;
 
 typedef struct _puzzlesBox{
@@ -138,7 +139,8 @@ puzzlesBox* puzzle_freePuzzlesBox(puzzlesBox* box){
  *
  * Arguments:   puzzle - the puzzle to be validated
  * Returns:     0 - the puzzle is valid
- *              -1 - the puzzle is invalid
+ *              1 - the puzzle is formated correctly, but invalid
+ *              -1 - the puzzle is formated incorrectly
  * Side-Effects:    allocates memmory for the city map and touristic point array
  *                  if validation occurs
  *
@@ -150,17 +152,25 @@ int puzzle_paremetersCheck(puzzleInfo* puzzle){
     int i = 0;
     /*se os parametros da estrutura forem validos retorna 0 
     se invalidos, limpa os dados inseridos e retorna -1  */
-    if(( puzzle->problemType!= 'A') && (puzzle->problemType!= 'B'))
-        validation = -1;
+
+    if( (puzzle->problemType < 'A' || puzzle->problemType > 'Z') && 
+        (puzzle->problemType < 'a'|| puzzle->problemType > 'z') ){
+            
+            validation = -1;
+            return validation;
+        }
+    
+    else if(( puzzle->problemType!= 'A') && (puzzle->problemType!= 'B'))
+        validation = 1;
     else if( puzzle->problemType == 'A'){
         if(puzzle->nPoints != 1)
-            validation = -1;
+            validation = 1;
     }
     else if( puzzle->problemType == 'B'){
         if( puzzle->nPoints < 2)
-            validation = -1;
+            validation = 1;
     }
-    if(validation != -1){
+    if(validation == 0){
         puzzle->touristicPoints = calloc(puzzle->nPoints,sizeof(vec**));
         if(puzzle->touristicPoints == NULL){
             printf("Memory allocation error!\n");
@@ -181,12 +191,8 @@ int puzzle_paremetersCheck(puzzleInfo* puzzle){
                 exit(0);
             }
         }
-        return 0;
     }
-    puzzle->problemType = '\0';
-    puzzle->nPoints = -1;
-    vec_set(puzzle->cityDimensions, -1, -1);
-    return -1;
+    return validation;
 }
 
 /******************************************************************************
@@ -216,6 +222,10 @@ void puzzle_setTouristicPoint(puzzleInfo* puzzle, int i, int x, int y){
 
 void puzzle_setCityMapTile(puzzleInfo* puzzle, int x, int y, short t){
     puzzle->cityMap[x][y] = t;
+}
+
+void puzzle_setValidity(puzzleInfo* puzzle, short validity){
+    puzzle->valid = validity;
 }
 
 /******************************************************************************
@@ -254,4 +264,8 @@ int puzzle_getNPuzzles(puzzlesBox* box){
 
 puzzleInfo* puzzle_getPuzzleFromBox(puzzlesBox* box, int i){
     return box->puzzles[i];
+}
+
+short puzzle_getValidity(puzzleInfo* puzzle){
+    return puzzle->valid;
 }

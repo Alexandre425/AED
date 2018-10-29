@@ -25,6 +25,7 @@ void solution_solvePuzzleBox(puzzlesBox* box, char* argv[]){
     FILE* fp = NULL;
     char* token;
     char* fileName;
+    char solution[64];
     token = strtok(argv[1], ".");
     fileName = strcat(token, ".valid");
     fp = fopen(fileName, "w");
@@ -35,14 +36,27 @@ void solution_solvePuzzleBox(puzzlesBox* box, char* argv[]){
 
     for (i = 0; i < puzzle_getNPuzzles(box); i++){
         puzzle = puzzle_getPuzzleFromBox(box, i);
-        switch (puzzle_getProblemType(puzzle)){
-            case 'A':
-                solution_problemA(puzzle, fp);
-                break;
-            case 'B':
-                solution_problemB(puzzle, fp);
-                break;
+        if (puzzle_getValidity(puzzle) == -1 || 
+            0 == puzzle_getTileCost(puzzle, puzzle_getTouristicPoint(puzzle, 0))){
+                sprintf(solution, "%d %d %c %d %d %d\n\n", 
+                    vec_x(puzzle_getCityDimensions(puzzle)),
+                    vec_y(puzzle_getCityDimensions(puzzle)),
+                    puzzle_getProblemType(puzzle),
+                    puzzle_getNPoints(puzzle),
+                    -1,
+                    0
+                    );
+                file_writeSolution(solution, fp);
         }
+        else
+            switch (puzzle_getProblemType(puzzle)){
+                case 'A':
+                    solution_problemA(puzzle, fp);
+                    break;
+                case 'B':
+                    solution_problemB(puzzle, fp);
+                    break;
+            }
     }
 
     for (i = 0; i < 8; i++)
@@ -110,6 +124,7 @@ void solution_problemA(puzzleInfo* puzzle, FILE* fp){
         );
 
     file_writeSolution(solution, fp);
+    free (sum);
 }
 
 /******************************************************************************
