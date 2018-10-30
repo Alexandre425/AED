@@ -1,9 +1,10 @@
 #include "vector.h"
 
-typedef struct _vec{
-    int x;
-    int y;
-}vec;
+typedef struct _vec
+{
+  int x;
+  int y;
+} vec;
 
 #define sqr(a) ((a) * (a))
 
@@ -13,8 +14,9 @@ typedef struct _vec{
  * Arguments:   v - vector
  * Returns: the x coordinate of the vector 
  *****************************************************************************/
-int vec_x(vec *v){
-    return v->x;
+int vec_x(vec *v)
+{
+  return v->x;
 }
 
 /******************************************************************************
@@ -23,8 +25,9 @@ int vec_x(vec *v){
  * Arguments:   v - vector
  * Returns: the y coordinate of the vector 
  *****************************************************************************/
-int vec_y(vec *v){
-    return v->y;
+int vec_y(vec *v)
+{
+  return v->y;
 }
 
 /******************************************************************************
@@ -38,9 +41,10 @@ int vec_y(vec *v){
  * Description: calculates the sum of the vectors a and b. puts the result in s
  *
  *****************************************************************************/
-void vec_sum(vec* s, vec* a, vec* b ){
-    s->x = a->x + b->x;
-    s->y = a->y + b->y;
+void vec_sum(vec *s, vec *a, vec *b)
+{
+  s->x = a->x + b->x;
+  s->y = a->y + b->y;
 }
 
 /******************************************************************************
@@ -54,16 +58,18 @@ void vec_sum(vec* s, vec* a, vec* b ){
  * Description: creates a new vector with the given coordinates
  *
  *****************************************************************************/
-vec* vec_create(int x, int y){
-    vec* v = NULL;
-    v = calloc(1, sizeof(vec));
-    if (v == NULL){
-        printf("Memory allocation error!\n");
-        exit(0);
-    }
-    v->x = x;
-    v->y = y;
-    return v;
+vec *vec_create(int x, int y)
+{
+  vec *v = NULL;
+  v = calloc(1, sizeof(vec));
+  if (v == NULL)
+  {
+    printf("Memory allocation error!\n");
+    exit(0);
+  }
+  v->x = x;
+  v->y = y;
+  return v;
 }
 
 /******************************************************************************
@@ -76,9 +82,10 @@ vec* vec_create(int x, int y){
  * Description: sets a vector's coordinates to the given coordinates
  *
  *****************************************************************************/
-void vec_set(vec* v, int x, int y){
-    v->x = x;
-    v->y = y;
+void vec_set(vec *v, int x, int y)
+{
+  v->x = x;
+  v->y = y;
 }
 
 /******************************************************************************
@@ -91,8 +98,9 @@ void vec_set(vec* v, int x, int y){
  * Description: gets the squared distance between two vectors
  *
  *****************************************************************************/
-int vec_dist_squared(vec* v, vec* u){
-    return (sqr(v->x - u->x) + sqr(v->y - u->y));
+int vec_dist_squared(vec *v, vec *u)
+{
+  return (sqr(v->x - u->x) + sqr(v->y - u->y));
 }
 
 /******************************************************************************
@@ -106,10 +114,10 @@ int vec_dist_squared(vec* v, vec* u){
  * Description: compares two vectors to determine if they are equal
  *
  *****************************************************************************/
-int vec_cmp(vec* v, vec* u){
-    if (v->x == u->x && v->y == u->y)
-        return 0;
-    else
-        return -1;
+int vec_cmp(vec *v, vec *u)
+{
+  if (v->x == u->x && v->y == u->y)
+    return 0;
+  else
+    return -1;
 }
-

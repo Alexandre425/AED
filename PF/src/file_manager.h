@@ -6,7 +6,7 @@
 #include "puzzle.h"
 
 /* read */
-puzzlesBox* file_readPuzzles(char *argv[]);
+puzzlesBox *file_readPuzzles(char *argv[]);
 
 /* write */
-void file_writeSolution(char* solutionString, FILE* fp);
+void file_writeSolution(char *solutionString, FILE *fp);
