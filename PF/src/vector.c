@@ -64,7 +64,6 @@ vec *vec_create(int x, int y)
   v = calloc(1, sizeof(vec));
   if (v == NULL)
   {
-    printf("Memory allocation error!\n");
     exit(0);
   }
   v->x = x;

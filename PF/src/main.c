@@ -14,14 +14,10 @@ int main(int argc, char *argv[])
   puzzlesBox *box = NULL;
 
   arguments_check(argc, argv);
-  for (i = 0; i < argc; i++)
-    printf("%s\n", argv[i]);
-
   box = file_readPuzzles(argv);
 
   solution_solvePuzzleBox(box, argv);
 
   box = puzzle_freePuzzlesBox(box);
-
   return 0;
 }

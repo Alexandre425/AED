@@ -32,7 +32,6 @@ puzzlesBox *puzzle_initPuzzlesBox()
   box = calloc(1, sizeof(puzzlesBox));
   if (box == NULL)
   {
-    printf("Memory allocation error!\n");
     exit(0);
   }
 
@@ -57,7 +56,6 @@ puzzleInfo *puzzle_initPuzzle()
   puzzle = calloc(1, sizeof(puzzleInfo));
   if (puzzle == NULL)
   {
-    printf("Memory allocation error!\n");
     exit(0);
   }
   puzzle->cityDimensions = vec_create(-1, -1);
@@ -84,7 +82,6 @@ void puzzle_storePuzzle(puzzleInfo *puzzle, puzzlesBox *box)
   box->puzzles = realloc(box->puzzles, (box->nPuzzles) * sizeof(puzzleInfo *));
   if (box->puzzles == NULL)
   {
-    printf("Memory allocation error!\n");
     exit(0);
   }
   box->puzzles[box->nPuzzles - 1] = puzzle;
@@ -196,7 +193,6 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
     puzzle->touristicPoints = calloc(puzzle->nPoints, sizeof(vec **));
     if (puzzle->touristicPoints == NULL)
     {
-      printf("Memory allocation error!\n");
       exit(0);
     }
     for (i = 0; i < puzzle->nPoints; i++)
@@ -205,7 +201,6 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
     puzzle->cityMap = calloc(vec_x(puzzle->cityDimensions), sizeof(short *));
     if (puzzle->cityMap == NULL)
     {
-      printf("Memory allocation error!\n");
       exit(0);
     }
     for (i = 0; i < vec_x(puzzle->cityDimensions); i++)
@@ -213,7 +208,6 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
       puzzle->cityMap[i] = calloc(vec_y(puzzle->cityDimensions), sizeof(short));
       if (puzzle->cityMap[i] == NULL)
       {
-        printf("Memory allocation error!\n");
         exit(0);
       }
     }

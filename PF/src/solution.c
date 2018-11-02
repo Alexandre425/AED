@@ -32,7 +32,6 @@ void solution_solvePuzzleBox(puzzlesBox *box, char *argv[])
   fp = fopen(fileName, "w");
   if (fp == NULL)
   {
-    printf("File could not be opened\n");
     exit(-1);
   }
 
