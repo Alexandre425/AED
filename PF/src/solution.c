@@ -32,7 +32,7 @@ void solution_solvePuzzleBox(puzzlesBox *box, char *argv[])
   fp = fopen(fileName, "w");
   if (fp == NULL)
   {
-    exit(-1);
+    exit(0);
   }
 
   for (i = 0; i < puzzle_getNPuzzles(box); i++)

@@ -22,7 +22,6 @@ puzzlesBox* file_readPuzzles(char *argv[])
 
   fp = fopen(argv[1], "r");
   if (fp == NULL){
-    printf("Cannot open file!\n");
     exit(0);
   }
   box = puzzle_initPuzzlesBox();
