@@ -2,7 +2,7 @@
 CC = gcc
 
 #flags for individual object file compilation
-CFLAGS = -Wall -ansi -O3
+CFLAGS = -Wall -ansi -g
 #RELEASE
 # -Wall -ansi -O3
 #DEVELOPMENT
@@ -25,3 +25,6 @@ $(EXECUTABLE): $(OBJECTS)
 
 bin/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm bin/*.o

@@ -9,9 +9,9 @@ CFLAGS = -Wall -ansi -O3
 # -Wall -ansi -g
 
 #source .c files
-SOURCE = $(wildcard src/*.c)
+SOURCE = $(wildcard *.c)
 #object files created
-OBJECTS = $(patsubst src/%.c,bin/%.o,$(SOURCE))
+OBJECTS = $(patsubst %.c,%.o,$(SOURCE))
 
 #executable name
 EXECUTABLE = tuktuk
@@ -23,5 +23,8 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJECTS)
 
-bin/%.o: src/%.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm *.o
