@@ -161,17 +161,18 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
     {
       vec_sum(sum, puzzle_getTouristicPoint(puzzle, i - 1), possibleMoves[j]);
       /* if one of them coincides with the next point, and it does not land in 0 */
-      if (solution_checkBounds(puzzle, sum) == 0 &&
+      if (solution_checkBounds(puzzle, puzzle_getTouristicPoint(puzzle, i)) == 0 &&
+          solution_checkBounds(puzzle, sum) == 0 &&
           vec_cmp(puzzle_getTouristicPoint(puzzle, i), sum) == 0 &&
           puzzle_getTileCost(puzzle, sum) != 0)
       {
-        /* move is valid, test the next move */
+        /* move is valid, t1est the next move */
         valid = 1;
         totalCost += puzzle_getTileCost(puzzle, sum);
         break;
       }
     }
-    /* if any one the moves tested is invalid, there is no need to test the othes */
+    /* if any one the moves tested is invalid, there is no need to test the others */
     if (valid == -1)
       break;
   }
