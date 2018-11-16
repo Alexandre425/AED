@@ -13,8 +13,8 @@ puzzlesBox* file_readPuzzles(char *argv[])
 {
     
   FILE *fp = NULL;
-  char buffer[1024];
-  char c;
+  char buffer[64];
+  int num;
   int i = 0, j = 0;
   short validity;
   puzzleInfo *puzzle = NULL; 
@@ -27,63 +27,36 @@ puzzlesBox* file_readPuzzles(char *argv[])
   box = puzzle_initPuzzlesBox();
   puzzle = puzzle_initPuzzle();
 
-  while (fgets(buffer, 1024, fp) != NULL){
+  while (fgets(buffer, 64, fp) != NULL){
     int x = -1, y = -1, nPoints = -1;
     char problemType = '\0';
-    int digitCount = 0;
     sscanf(buffer,"%d %d %c %d", &x, &y, &problemType, &nPoints);
-    memset(buffer, 0, 1024);
+    memset(buffer, 0, 64);
     puzzle_setCityDimensions(puzzle, x, y);
     puzzle_setProblemType(puzzle, problemType);
     puzzle_setNPoints(puzzle, nPoints);
     validity = puzzle_paremetersCheck(puzzle);
+    /* if the puzzle is valid, read the touristic points and tile map */
     if (0 == validity){
-      i = 0;
-      x = -1;
-      y = -1;
-      while (i < puzzle_getNPoints(puzzle)){
-        c = fgetc(fp);
-        if (c >= '0' && c <= '9'){
-            digitCount = 0;
-            while (c >= '0' && c <= '9'){
-              buffer[digitCount++] = c;
-              c = fgetc(fp);
-            }
-            if (x == -1)
-              sscanf(buffer, "%d", &x);
-            else{
-              sscanf(buffer, "%d", &y);
-              puzzle_setTouristicPoint(puzzle, i, x, y);
-              x = -1;
-              y = -1;
-              i++;
-            }
-            memset(buffer, 0, 64);
+      /* reading the touristic points */
+      for (i = 0; i < puzzle_getNPoints(puzzle); i++){
+        while (fscanf(fp, "%d", &num) != 1);
+        x = num;
+        while (fscanf(fp, "%d", &num) != 1);
+        y = num;
+        puzzle_setTouristicPoint(puzzle, i, x, y);
+      }
+
+      /* reading the tile map */
+      for (i = 0; i < vec_x(puzzle_getCityDimensions(puzzle)); i++){
+        for (j = 0; j < vec_y(puzzle_getCityDimensions(puzzle)); j++){
+          while (fscanf(fp, "%d", &num) != 1);
+          puzzle_setCityMapTile(puzzle, i, j, num);
         }
       }
-        
-        i = 0;
-        while (i < vec_x(puzzle_getCityDimensions(puzzle))){
-          j = 0;
-          while (j < vec_y(puzzle_getCityDimensions(puzzle))){
-            c = fgetc(fp);
-            if (c >= '0' && c <= '9'){
-              digitCount = 0;
-              while (c >= '0' && c <= '9'){
-                buffer[digitCount++] = c;
-                c = fgetc(fp);
-              }
-              sscanf(buffer, "%d", &x);
-              puzzle_setCityMapTile(puzzle, i, j, x);
-              memset(buffer, 0, 64);
-              j++;
-            }
-          }
-          i++;
-        } 
-        
-        puzzle_storePuzzle(puzzle, box);
-        puzzle = puzzle_initPuzzle();           
+      
+      puzzle_storePuzzle(puzzle, box);
+      puzzle = puzzle_initPuzzle();           
     }
     else if (validity == 1){
       puzzle_setValidity(puzzle, -1);

@@ -38,10 +38,7 @@ void solution_solvePuzzleBox(puzzlesBox *box, char *argv[])
   for (i = 0; i < puzzle_getNPuzzles(box); i++)
   {
     puzzle = puzzle_getPuzzleFromBox(box, i);
-    if (puzzle_getValidity(puzzle) == -1 ||
-        solution_checkBounds(puzzle, puzzle_getTouristicPoint(puzzle, 0)) != 0 ||
-        puzzle_getTileCost(puzzle, puzzle_getTouristicPoint(puzzle, 0)) == 0
-        )
+    if (puzzle_getValidity(puzzle) == -1)
     {
       sprintf(solution, "%d %d %c %d %d %d\n\n",
               vec_x(puzzle_getCityDimensions(puzzle)),
@@ -105,24 +102,25 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
 
   vec *sum = vec_create(0, 0);
 
-  for (i = 0; i < 8; i++)
-  {
-    vec_sum(sum, puzzle_getTouristicPoint(puzzle, 0), possibleMoves[i]);
-    if (0 == solution_checkBounds(puzzle, sum))
+  if (solution_checkBounds(puzzle, puzzle_getTouristicPoint(puzzle, 0)) == 0 &&
+      puzzle_getTileCost(puzzle, puzzle_getTouristicPoint(puzzle, 0)) != 0){
+    for (i = 0; i < 8; i++)
     {
-      cost = puzzle_getTileCost(puzzle, sum);
-      if (cost != 0)
+      vec_sum(sum, puzzle_getTouristicPoint(puzzle, 0), possibleMoves[i]);
+      if (solution_checkBounds(puzzle, sum) == 0)
       {
-        if (bestCost == 0)
-          bestCost = cost;
-        else if (bestCost > cost)
-          bestCost = cost;
+        cost = puzzle_getTileCost(puzzle, sum);
+        if (cost != 0)
+        {
+          if (bestCost == 0 || cost < bestCost){
+            bestCost = cost;
+            solutionExists = 1;
+          }
+        }
       }
     }
   }
-
-  if (bestCost != 0)
-    solutionExists = 1;
+  
 
   sprintf(solution, "%d %d %c %d %d %d\n\n",
           vec_x(puzzle_getCityDimensions(puzzle)),
@@ -145,40 +143,38 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
  *****************************************************************************/
 void solution_problemB(puzzleInfo *puzzle, FILE *fp)
 {
-
-  int i, j;
+  int i;
   int totalCost = 0;
   int valid;
-  vec *sum = vec_create(0, 0);
+  vec *this, *last;
   char solution[64];
 
-  for (i = 1; i < puzzle_getNPoints(puzzle); i++)
-  {
-    /* we assume the move is invalid */
-    valid = -1;
-    /* test all the possible moves */
-    for (j = 0; j < 8; j++)
-    {
-      vec_sum(sum, puzzle_getTouristicPoint(puzzle, i - 1), possibleMoves[j]);
-      /* if one of them coincides with the next point, and it does not land in 0 */
-      if (solution_checkBounds(puzzle, sum) == 0 &&
-          vec_cmp(puzzle_getTouristicPoint(puzzle, i), sum) == 0 &&
-          puzzle_getTileCost(puzzle, sum) != 0)
+  valid = 1;
+  for (i = 0; i < puzzle_getNPoints(puzzle); i++){
+    /* checking all of the touristic points to check if they are in bounds and passable */
+    if (solution_checkBounds(puzzle, puzzle_getTouristicPoint(puzzle, i)) != 0 ||
+        puzzle_getTileCost(puzzle, puzzle_getTouristicPoint(puzzle, i)) == 0)
       {
-        /* move is valid, t1est the next move */
-        valid = 1;
-        totalCost += puzzle_getTileCost(puzzle, sum);
+        valid = -1;
+        break;
+      }
+  }
+
+  /* if all points are in bounds, proceed */
+  if (valid == 1)
+    for (i = 1; i < puzzle_getNPoints(puzzle); i++)
+    {
+      this = puzzle_getTouristicPoint(puzzle, i);
+      last = puzzle_getTouristicPoint(puzzle, i-1);
+
+      totalCost += puzzle_getTileCost(puzzle, this);
+
+      if (vec_dist_squared(this, last) != 5){
+        valid = -1;
+        totalCost = 0;
         break;
       }
     }
-    /* if any one the moves tested is invalid, there is no need to test the others */
-    if (valid == -1)
-      break;
-  }
-
-  /* as the cycle completes, we have our final answer */
-  if (valid == -1)
-    totalCost = 0;
 
   sprintf(solution, "%d %d %c %d %d %d\n\n",
           vec_x(puzzle_getCityDimensions(puzzle)),
@@ -188,6 +184,4 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
           valid,
           totalCost);
   file_writeSolution(solution, fp);
-
-  free(sum);
 }
