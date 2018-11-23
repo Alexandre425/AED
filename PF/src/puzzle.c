@@ -165,21 +165,25 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
 {
   int validation = 0;
   int i = 0;
-  /*se os parametros da estrutura forem validos retorna 0 
-    se invalidos, limpa os dados inseridos e retorna -1  */
-
+  
+  // if the problem type is not an alphabetical character
   if ((puzzle->problemType < 'A' || puzzle->problemType > 'Z') &&
       (puzzle->problemType < 'a' || puzzle->problemType > 'z'))
   {
-
+    // -1 -> not a puzzle, you read a garbage line! Don't print anything
     validation = -1;
     return validation;
   }
 
+  // if it is a character, but not one corresponding to a problem type
   else if ((puzzle->problemType != 'A') && (puzzle->problemType != 'B'))
+    // 1 -> an invalid puzzle, print accordingly
     validation = 1;
+
+  // if it is a valid problem type...
   else if (puzzle->problemType == 'A')
   {
+    // ...but has corresponding invalid parameters
     if (puzzle->nPoints != 1)
       validation = 1;
   }
@@ -188,30 +192,28 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
     if (puzzle->nPoints < 2)
       validation = 1;
   }
+
+  // if none of the previous conditions triggered
+  // 0 -> a valid puzzle, proceed to the solving process
   if (validation == 0)
   {
+    // allocate everything not allocated before (which was unnecessary for a validation check)
     puzzle->touristicPoints = calloc(puzzle->nPoints, sizeof(vec **));
-    if (puzzle->touristicPoints == NULL)
-    {
-      exit(0);
-    }
+    if (puzzle->touristicPoints == NULL) exit(0);
+
     for (i = 0; i < puzzle->nPoints; i++)
       puzzle->touristicPoints[i] = vec_create(-1, -1);
 
     puzzle->cityMap = calloc(vec_x(puzzle->cityDimensions), sizeof(short *));
-    if (puzzle->cityMap == NULL)
-    {
-      exit(0);
-    }
+    if (puzzle->cityMap == NULL) exit(0);
+
     for (i = 0; i < vec_x(puzzle->cityDimensions); i++)
     {
       puzzle->cityMap[i] = calloc(vec_y(puzzle->cityDimensions), sizeof(short));
-      if (puzzle->cityMap[i] == NULL)
-      {
-        exit(0);
-      }
+      if (puzzle->cityMap[i] == NULL) exit(0);
     }
   }
+
   return validation;
 }
 

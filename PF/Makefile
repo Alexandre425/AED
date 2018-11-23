@@ -31,9 +31,7 @@ all: $(EXECUTABLE)
 
 run: $(EXECUTABLE)
 	@for file in $(INPUTS); do \
-		echo "\n======================="; \
 		echo $$file; \
-		echo "=======================\n"; \
 		./$(EXECUTABLE) $$file; \
 	done
 
