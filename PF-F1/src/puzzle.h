@@ -1,3 +1,6 @@
+#ifndef _PUZZLE
+#define _PUZZLE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,3 +38,5 @@ int puzzle_getTileCost(puzzleInfo *puzzle, vec *position);
 int puzzle_getNPuzzles(puzzlesBox *box);
 puzzleInfo *puzzle_getPuzzleFromBox(puzzlesBox *box, int index);
 short puzzle_getValidity(puzzleInfo *puzzle);
+
+#endif

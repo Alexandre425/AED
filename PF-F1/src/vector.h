@@ -1,3 +1,7 @@
+#ifndef _VECTOR
+#define _VECTOR
+
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,3 +21,5 @@ void vec_set(vec *vector, int x_coord, int y_coord);
 
 /* init */
 vec *vec_create(int x_coord, int y_coord);
+
+#endif

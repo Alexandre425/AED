@@ -9,25 +9,24 @@
  * Description: reads, validates and stores the puzzles in the foo.cities file
  *
  *****************************************************************************/
-puzzlesBox* file_readPuzzles(char *argv[])
+void file_readPuzzles(char *argv[])
 {
     
-  FILE *fp = NULL;
+  FILE *fpin = NULL, *fpout = NULL;
   char buffer[64];
   int num;
   int i = 0, j = 0;
-  short validity;
   puzzleInfo *puzzle = NULL; 
-  puzzlesBox *box =NULL;
 
-  fp = fopen(argv[1], "r");
-  if (fp == NULL){
+  fpin = fopen(argv[1], "r");
+  if (fpin == NULL){
     exit(0);
   }
-  box = puzzle_initPuzzlesBox();
+
+  fpout = solution_init(argv);
   puzzle = puzzle_initPuzzle();
 
-  while (fgets(buffer, 64, fp) != NULL){
+  while (fgets(buffer, 64, fpin) != NULL){
     int x = -1, y = -1, nPoints = -1;
     char problemType = '\0';
     sscanf(buffer,"%d %d %c %d", &x, &y, &problemType, &nPoints);
@@ -35,14 +34,15 @@ puzzlesBox* file_readPuzzles(char *argv[])
     puzzle_setCityDimensions(puzzle, x, y);
     puzzle_setProblemType(puzzle, problemType);
     puzzle_setNPoints(puzzle, nPoints);
-    validity = puzzle_paremetersCheck(puzzle);
+    puzzle_setValidity(puzzle, puzzle_paremetersCheck(puzzle));
+
     /* if the puzzle is valid, read the touristic points and tile map */
-    if (0 == validity){
+    if (puzzle_getValidity(puzzle) == 0){
       /* reading the touristic points */
       for (i = 0; i < puzzle_getNPoints(puzzle); i++){
-        while (fscanf(fp, "%d", &num) != 1);
+        while (fscanf(fpin, "%d", &num) != 1);
         x = num;
-        while (fscanf(fp, "%d", &num) != 1);
+        while (fscanf(fpin, "%d", &num) != 1);
         y = num;
         puzzle_setTouristicPoint(puzzle, i, x, y);
       }
@@ -50,25 +50,27 @@ puzzlesBox* file_readPuzzles(char *argv[])
       /* reading the tile map */
       for (i = 0; i < vec_x(puzzle_getCityDimensions(puzzle)); i++){
         for (j = 0; j < vec_y(puzzle_getCityDimensions(puzzle)); j++){
-          while (fscanf(fp, "%d", &num) != 1);
+          while (fscanf(fpin, "%d", &num) != 1);
           puzzle_setCityMapTile(puzzle, i, j, num);
         }
       }
+
+      solution_solvePuzzle(puzzle, fpout);
+      puzzle_freePuzzle(puzzle);
+      puzzle = puzzle_initPuzzle();
       
-      puzzle_storePuzzle(puzzle, box);
-      puzzle = puzzle_initPuzzle();           
     }
-    else if (validity == 1){
-      puzzle_setValidity(puzzle, -1);
-      puzzle_storePuzzle(puzzle, box);
+    // if the puzzle is invalid, write the solution (no more information needs to be read)
+    else if (puzzle_getValidity(puzzle) == 1){
+      solution_solvePuzzle(puzzle, fpout);
+      puzzle_freePuzzle(puzzle);
       puzzle = puzzle_initPuzzle();
     }
-    memset(buffer, 0, 64);
   }
 
-  fclose(fp);
+  fclose(fpin);
   puzzle_freePuzzle(puzzle);
-  return box;
+  solution_free(fpout);
 }
 
 /******************************************************************************

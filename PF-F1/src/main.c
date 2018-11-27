@@ -9,13 +9,8 @@
 
 int main(int argc, char *argv[])
 {
-  puzzlesBox *box = NULL;
-
   arguments_check(argc, argv);
-  box = file_readPuzzles(argv);
+  file_readPuzzles(argv);
 
-  solution_solvePuzzleBox(box, argv);
-
-  box = puzzle_freePuzzlesBox(box);
   return 0;
 }
