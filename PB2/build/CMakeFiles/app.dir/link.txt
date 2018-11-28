@@ -1,1 +1,0 @@
-/usr/bin/gcc-7   -g  -rdynamic CMakeFiles/app.dir/source/main.c.o  -o app 

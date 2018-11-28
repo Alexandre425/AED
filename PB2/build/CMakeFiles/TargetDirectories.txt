@@ -1,3 +1,0 @@
-/home/alexandre/Desktop/C Projects/aed/PB2/build/CMakeFiles/rebuild_cache.dir
-/home/alexandre/Desktop/C Projects/aed/PB2/build/CMakeFiles/app.dir
-/home/alexandre/Desktop/C Projects/aed/PB2/build/CMakeFiles/edit_cache.dir
