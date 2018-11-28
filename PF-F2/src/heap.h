@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+//#include "vector.h"
 
 #define HEAP_SIZE 100
 #define childL(a) ((a*2)+1)
@@ -22,10 +23,13 @@ void heap_fixDown(heap_t *h, int idx);
 void heap_fixUp(heap_t *h, int idx);
 
 // get
-Item heap_get(heap_t *h);
+int heap_get(heap_t *h);
 
 // put
-heap_t* heap_put(heap_t *h, Item thing, short priority);
+heap_t* heap_put(heap_t *h, int nodeId, short priority);
+
+// update
+void heap_update(heap_t* h, int nodeId, short newPriority );
 
 // utils
 void heap_exch(heap_t* h, int i, int j);

@@ -14,6 +14,7 @@
 void solution_solvePuzzle(puzzleInfo *puzzle, FILE* fpout);
 void solution_problemA(puzzleInfo *puzzle, FILE *solutionFile);
 void solution_problemB(puzzleInfo *puzzle, FILE *solutionFile);
+void solution_problemC(puzzleInfo *puzzle, FILE *solutionFile);
 
 /* utils */
 int solution_checkBounds(puzzleInfo *puzzle, vec *position);

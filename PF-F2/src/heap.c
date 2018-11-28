@@ -1,7 +1,8 @@
 #include "heap.h"
 
 typedef struct{
-  Item thing;
+  int nodeId;
+  //Item thing;// em vez do vetor, pode guardar so int nodeId neste caso vai ser igual a ( x * max collumn) + y ;
   short priority;
 }node;
 
@@ -23,6 +24,7 @@ heap* heap_initHeap(void){
   heap *h = calloc(1, sizeof(heap)); if (h == NULL) exit(0);
   h->array = calloc(HEAP_SIZE, sizeof(node)); if (h->array == NULL) exit(0);
   h->heapSize = HEAP_SIZE;
+  h->heapCount = 0;
   return h;
 }
 
@@ -30,14 +32,14 @@ heap* heap_initHeap(void){
  * heap_put()
  *
  * Arguments:   h - the heap to put the thing in
- *              thing - the thing to put in the heap
+ *              nodeId - id the thing to put in the heap
  * 
- * Description: puts the thing in the heap and fixes it
+ * Description: puts something in the heap and fixes it
  *
  *****************************************************************************/
-heap* heap_put(heap* h, Item thing, short priority){
+heap* heap_put(heap* h, int nodeId, short priority){
   // putting and fixing
-  h->array[h->heapCount].thing = thing;
+  h->array[h->heapCount].nodeId = nodeId;
   h->array[h->heapCount].priority = priority;
   heap_fixUp(h, h->heapCount);
   h->heapCount++;
@@ -50,16 +52,36 @@ heap* heap_put(heap* h, Item thing, short priority){
  * heap_get()
  *
  * Arguments:   h - the heap to put the thing in
- * Returns:     
+ * Returns:     ID of the first thing in the heap
  * 
- * Description: puts the thing in the heap and fixes it
+ * Description: take a thing of the heap and fixes it
  *
  *****************************************************************************/
-Item heap_get(heap* h){
-  Item thing = h->array[--h->heapCount].thing;
+int heap_get(heap* h){
+  int nodeId = h->array[--h->heapCount].nodeId;
   heap_exch(h, 0, h->heapCount);
   heap_fixDown(h, 0);
-  return thing;
+  return nodeId;
+}
+/******************************************************************************
+ * heap_update()
+ *
+ * Arguments:   h - the heap to updated
+ *              nodeId - node identification
+ *              priority - new value to be updated
+ * 
+ * Description: update the heap after update the node priority
+ *
+ *****************************************************************************/
+void heap_update(heap* h, int nodeId, short newPriority ){
+  for(int i = 0; i < h->heapCount; i++){
+    if(nodeId == h->array[i].nodeId){
+      h->array[i].priority = newPriority;
+      heap_fixUp(h,i);
+      return;
+    }
+  }
+
 }
 
 /******************************************************************************
@@ -147,9 +169,6 @@ void heap_fixDown(heap* h, int i){
  *
  *****************************************************************************/
 void heap_free(heap* h){
-  for (int i = 0; i < h->heapSize; i++)
-    if (h->array[i].thing != NULL)
-      free(h->array[i].thing);
   free(h->array);
   free(h);
 }

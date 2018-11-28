@@ -17,29 +17,6 @@ typedef struct _puzzlesBox
   puzzleInfo **puzzles;
 } puzzlesBox;
 
-/******************************************************************************
- * puzzle_initPuzzlesBox()
- *
- * Returns: the allocated puzzle box
- *
- * Description: initializes the puzzle box
- *
- *****************************************************************************/
-puzzlesBox *puzzle_initPuzzlesBox()
-{
-  puzzlesBox *box = NULL;
-
-  box = calloc(1, sizeof(puzzlesBox));
-  if (box == NULL)
-  {
-    exit(0);
-  }
-
-  box->nPuzzles = 0;
-  box->puzzles = NULL;
-
-  return box;
-}
 
 /******************************************************************************
  * puzzle_initPuzzle()
@@ -61,30 +38,6 @@ puzzleInfo *puzzle_initPuzzle()
   puzzle->cityDimensions = vec_create(-1, -1);
 
   return puzzle;
-}
-
-/******************************************************************************
- * puzzle_storePuzzle()
- *
- * Arguments:   puzzle - a puzzle to be stored
- *              box - a box for it to be stored in
- * Side-Effects:    reallocates the box->puzzles array
- *                  increments the number of puzzles
- *
- * Description: stores a puzzle in the box
- *
- *****************************************************************************/
-void puzzle_storePuzzle(puzzleInfo *puzzle, puzzlesBox *box)
-{
-
-  box->nPuzzles++;
-
-  box->puzzles = realloc(box->puzzles, (box->nPuzzles) * sizeof(puzzleInfo *));
-  if (box->puzzles == NULL)
-  {
-    exit(0);
-  }
-  box->puzzles[box->nPuzzles - 1] = puzzle;
 }
 
 /******************************************************************************
@@ -124,31 +77,6 @@ puzzleInfo *puzzle_freePuzzle(puzzleInfo *puzzle)
 }
 
 /******************************************************************************
- * puzzle_freePuzzlesBox()
- *
- * Arguments:   box - the box to be freed
- * Returns: NULL
- *
- * Description: frees all the puzzles in the box, and then the box
- *
- *****************************************************************************/
-puzzlesBox *puzzle_freePuzzlesBox(puzzlesBox *box)
-{
-  int i = 0;
-  if (box == NULL)
-    return NULL;
-  if (box->puzzles != NULL)
-  {
-    for (i = 0; i < box->nPuzzles; i++)
-    {
-      box->puzzles[i] = puzzle_freePuzzle(box->puzzles[i]);
-    }
-    free(box->puzzles);
-  }
-  free(box);
-  return NULL;
-}
-/******************************************************************************
  * puzzle_paremetersCheck()
  *
  * Arguments:   puzzle - the puzzle to be validated
@@ -184,10 +112,10 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
   else if (puzzle->problemType == 'A')
   {
     // ...but has corresponding invalid parameters
-    if (puzzle->nPoints != 1)
+    if (puzzle->nPoints != 2)
       validation = 1;
   }
-  else if (puzzle->problemType == 'B')
+  else if (puzzle->problemType == 'B' || puzzle->problemType == 'C')
   {
     if (puzzle->nPoints < 2)
       validation = 1;
