@@ -1,5 +1,4 @@
-#ifndef _HEAP
-#define _HEAP
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +23,7 @@ void heap_fixUp(heap_t *h, int idx);
 
 // get
 int heap_get(heap_t *h);
+int heap_getCount(heap_t* h);
 
 // put
 heap_t* heap_put(heap_t *h, int nodeId, short priority);
@@ -37,7 +37,3 @@ void heap_debugPrint(heap_t* h);
 
 // free
 void heap_free(heap_t* h);
-
-
-
-#endif

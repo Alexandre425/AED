@@ -120,3 +120,32 @@ int vec_cmp(vec *v, vec *u)
   else
     return -1;
 }
+/******************************************************************************
+ * vec_idxToVec
+ *
+ * Arguments:   dim - dimension vector
+ *              idx - node index
+ * Returns:     v - position vector
+ *
+ * Description: translates a node index to a position vector
+ *
+ *****************************************************************************/
+vec* vec_idxToVec(vec *dim, int idx)
+{
+  return vec_create(idx/dim->y, idx%dim->y);
+}
+
+/******************************************************************************
+ * vec_vecToIdx
+ *
+ * Arguments:   dim - dimension vector
+ *              v - position vector
+ * Returns:     idx - node index
+ *
+ * Description: translates a position vector to a node index
+ *
+ *****************************************************************************/
+int vec_vecToIdx(vec *dim, vec *v)
+{
+  return ((v->x * dim->y) + v->y);
+}

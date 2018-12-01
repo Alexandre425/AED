@@ -11,11 +11,6 @@ typedef struct _puzzleInfo
   short valid;
 } puzzleInfo;
 
-typedef struct _puzzlesBox
-{
-  int nPuzzles;
-  puzzleInfo **puzzles;
-} puzzlesBox;
 
 
 /******************************************************************************
@@ -217,16 +212,6 @@ vec *puzzle_getTouristicPoint(puzzleInfo *puzzle, int i)
 int puzzle_getTileCost(puzzleInfo *puzzle, vec *pos)
 {
   return puzzle->cityMap[vec_x(pos)][vec_y(pos)];
-}
-
-int puzzle_getNPuzzles(puzzlesBox *box)
-{
-  return box->nPuzzles;
-}
-
-puzzleInfo *puzzle_getPuzzleFromBox(puzzlesBox *box, int i)
-{
-  return box->puzzles[i];
 }
 
 short puzzle_getValidity(puzzleInfo *puzzle)

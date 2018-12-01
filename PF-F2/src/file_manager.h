@@ -1,5 +1,4 @@
-#ifndef _FILE_MANAGER
-#define _FILE_MANAGER
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,5 +13,3 @@ void file_readPuzzles(char *argv[]);
 
 /* write */
 void file_writeSolution(char *solutionString, FILE *fp);
-
-#endif

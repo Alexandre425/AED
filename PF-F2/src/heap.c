@@ -70,7 +70,7 @@ int heap_get(heap* h){
  *              nodeId - node identification
  *              priority - new value to be updated
  * 
- * Description: update the heap after update the node priority
+ * Description: update the heap after an update to the node priority
  *
  *****************************************************************************/
 void heap_update(heap* h, int nodeId, short newPriority ){
@@ -159,6 +159,21 @@ void heap_fixDown(heap* h, int i){
     idx = child;
   }
 }
+
+/******************************************************************************
+ * heap_getCount()
+ *
+ * Arguments:   h - the heap
+ * Returns:     count - the number of things in the heap
+ *              
+ * Description: fixes the heap going up from the supplied index
+ *
+ *****************************************************************************/
+int heap_getCount(heap* h)
+{
+  return h->heapCount;
+}
+
 
 /******************************************************************************
  * heap_free()

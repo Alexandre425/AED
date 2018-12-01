@@ -1,5 +1,4 @@
-#ifndef _PUZZLE
-#define _PUZZLE
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,18 +6,14 @@
 #include "vector.h"
 
 typedef struct _puzzleInfo puzzleInfo;
-typedef struct _puzzlesBox puzzlesBox;
 
 /* init */
-puzzlesBox *puzzle_initPuzzlesBox();
 puzzleInfo *puzzle_initPuzzle();
 
 /* free */
-puzzlesBox *puzzle_freePuzzlesBox(puzzlesBox *box);
 puzzleInfo *puzzle_freePuzzle(puzzleInfo *puzzle);
 
 /* utils */
-void puzzle_storePuzzle(puzzleInfo *puzzle, puzzlesBox *box);
 int puzzle_paremetersCheck(puzzleInfo *puzzle);
 
 /* set */
@@ -35,8 +30,5 @@ int puzzle_getNPoints(puzzleInfo *puzzle);
 vec *puzzle_getCityDimensions(puzzleInfo *puzzle);
 vec *puzzle_getTouristicPoint(puzzleInfo *puzzle, int index);
 int puzzle_getTileCost(puzzleInfo *puzzle, vec *position);
-int puzzle_getNPuzzles(puzzlesBox *box);
-puzzleInfo *puzzle_getPuzzleFromBox(puzzlesBox *box, int index);
-short puzzle_getValidity(puzzleInfo *puzzle);
 
-#endif
+short puzzle_getValidity(puzzleInfo *puzzle);

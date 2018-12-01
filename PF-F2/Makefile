@@ -8,19 +8,20 @@ CFLAGS = -Wall -std=c99 -g
 #DEVELOPMENT
 # -Wall -std=c99 -g
 
+#file extentions
+IEXT = cities
+OEXT = walks
+CEXT = check
+
 #source .c files
 SOURCE = $(wildcard src/*.c)
 #object files created
 OBJECTS = $(patsubst src/%.c,bin/%.o,$(SOURCE))
-
-#file extentions
-IEXT = cities
-OEXT = valid
 #resources to test
 INPUTS = $(wildcard res/*.$(IEXT))
 #output of tests
 OUTPUTS = $(wildcard res/*.$(OEXT))
-ORIGINALS = $(patsubst res/%.$(OEXT),org/%.$(OEXT),$(OUTPUTS))
+ORIGINALS = $(patsubst res/%.$(OEXT),org/%.$(CEXT),$(OUTPUTS))
 
 #executable name
 EXECUTABLE = tuktuk
@@ -37,8 +38,8 @@ run: $(EXECUTABLE)
 
 cmp: FORCE $(ORIGINALS)
 	
-org/%.$(OEXT): res/%.$(OEXT)
-	@diff -s $< $@
+org/%.$(CEXT): res/%.$(OEXT) FORCE
+	@python3 script.py $< $@
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJECTS)
