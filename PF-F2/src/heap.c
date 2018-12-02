@@ -2,8 +2,7 @@
 
 typedef struct{
   int nodeId;
-  //Item thing;// em vez do vetor, pode guardar so int nodeId neste caso vai ser igual a ( x * max collumn) + y ;
-  short priority;
+  short priority; //retirar isto daqui e usar o dij
 }node;
 
 typedef struct _heap{
@@ -58,10 +57,9 @@ heap* heap_put(heap* h, int nodeId, short priority){
  *
  *****************************************************************************/
 int heap_get(heap* h){
-  int nodeId = h->array[--h->heapCount].nodeId;
-  heap_exch(h, 0, h->heapCount);
+  heap_exch(h, 0, --h->heapCount);
   heap_fixDown(h, 0);
-  return nodeId;
+  return h->array[h->heapCount].nodeId;
 }
 /******************************************************************************
  * heap_update()

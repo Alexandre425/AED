@@ -137,7 +137,7 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
     {
       vec_sum(sum, point, possibleMoves[i]);
       int sumNode = vec_vecToIdx(dim, sum);
-      int pointNode = vec_vecToIdx(dim, point);
+      int pointNode = idx;
       // check their bounds and accesibility again
       if (solution_checkBounds(puzzle, sum) == 0 &&
           (newCost = puzzle_getTileCost(puzzle, sum)) != 0)
@@ -151,7 +151,7 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
           dij[sumNode]->parent = pointNode;                                   // set its parent
           dij[sumNode]->cost = newCost + dij[pointNode]->cost;                // set its cost
           dij[sumNode]->outOfQueue = false;                                   // set the queue condition
-          *priorityQueue = heap_put(*priorityQueue, idx, dij[sumNode]->cost); // put it in the queue
+          *priorityQueue = heap_put(*priorityQueue, sumNode, dij[sumNode]->cost); // put it in the queue
         }
         // if it is in the queue already (and hasn't left already)
         // and the cost from the current parent is lower that the registered cost
@@ -160,7 +160,7 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
         {
           dij[sumNode]->parent = pointNode;                     // set its new parent
           dij[sumNode]->cost = newCost + dij[pointNode]->cost;  // set its new cost
-          heap_update(*priorityQueue, idx, dij[sumNode]->cost); // update the queue
+          heap_update(*priorityQueue, sumNode, dij[sumNode]->cost); // update the queue
         }
       }
     }
@@ -209,6 +209,7 @@ void solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
     // put its neighbours in the queue and update it
     solution_updateQueue(puzzle, node, dij, &priorityQueue);
   }
+  if(heap_getCount(priorityQueue) == 0) printf("\nNão há caminho\n");
 }
 
 /******************************************************************************
@@ -231,7 +232,10 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
   solution_dijkstra(puzzle, start, end, dij);
 
   // WRITE SOLUTION HERE
-
+  if(dij[vec_vecToIdx(dim,end)] != NULL)
+      printf("%d: cost %d, pai %d\n", vec_vecToIdx(dim,end) , dij[vec_vecToIdx(dim,end)]->cost, dij[vec_vecToIdx(dim,end)]->parent );
+  
+  //free dos elementos no vetor
   free(dij);
 }
 
