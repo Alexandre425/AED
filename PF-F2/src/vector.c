@@ -61,11 +61,8 @@ void vec_sum(vec *s, vec *a, vec *b)
 vec *vec_create(int x, int y)
 {
   vec *v = NULL;
-  v = calloc(1, sizeof(vec));
-  if (v == NULL)
-  {
-    exit(0);
-  }
+  v = calloc_check(1, sizeof(vec));
+  
   v->x = x;
   v->y = y;
   return v;

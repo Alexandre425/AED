@@ -124,6 +124,7 @@ int solution_checkBounds(puzzleInfo *puzzle, vec *pos)
 void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **priorityQueue)
 {
   int newCost;
+  int changedNothing = 1;
   vec *sum = vec_create(0, 0);
   vec *point = vec_idxToVec(puzzle_getCityDimensions(puzzle), idx);
   vec *dim = puzzle_getCityDimensions(puzzle);
@@ -142,15 +143,20 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
       if (solution_checkBounds(puzzle, sum) == 0 &&
           (newCost = puzzle_getTileCost(puzzle, sum)) != 0)
       {
-        // if the neighbour is not in the queue (pointer is NULL)
-        if (dij[sumNode] == NOT_IN_QUEUE)
+        // if the point made no past changes (meaning its a dead end)
+        if (dij[sumNode] == MADE_NO_CHANGE)
         {
-          dij[sumNode] = calloc(1, sizeof(vertex_t));
-          if (dij[sumNode] == NULL)
-            exit(0);
-          dij[sumNode]->parent = pointNode;                                   // set its parent
-          dij[sumNode]->cost = newCost + dij[pointNode]->cost;                // set its cost
-          dij[sumNode]->outOfQueue = false;                                   // set the queue condition
+        }
+        // if the neighbour is not in the queue (pointer is NULL)
+        else if (dij[sumNode] == NOT_IN_QUEUE)
+        {
+          changedNothing = 0;
+          dij[sumNode] = calloc_check(1, sizeof(vertex_t));
+
+          dij[sumNode]->parent = pointNode;                    // set its parent
+          dij[sumNode]->cost = newCost + dij[pointNode]->cost; // set its cost
+          dij[sumNode]->outOfQueue = false;                    // set the queue condition
+
           *priorityQueue = heap_put(*priorityQueue, sumNode, dij[sumNode]->cost); // put it in the queue
         }
         // if it is in the queue already (and hasn't left already)
@@ -158,15 +164,73 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
         else if (dij[sumNode]->outOfQueue == false &&
                  newCost + dij[pointNode]->cost < dij[sumNode]->cost)
         {
-          dij[sumNode]->parent = pointNode;                     // set its new parent
-          dij[sumNode]->cost = newCost + dij[pointNode]->cost;  // set its new cost
+          changedNothing = 0;
+
+          dij[sumNode]->parent = pointNode;                    // set its new parent
+          dij[sumNode]->cost = newCost + dij[pointNode]->cost; // set its new cost
+
           heap_update(*priorityQueue, sumNode, dij[sumNode]->cost); // update the queue
         }
       }
     }
+    // if a point introduced nothing new to the SPT or queue
+    if (changedNothing == 1)
+    {
+      free(dij[idx]);
+      dij[idx] = MADE_NO_CHANGE;
+    }
   }
+
   free(sum);
   free(point);
+}
+
+/******************************************************************************
+ * solution_storePath()
+ *
+ * Arguments:   puzzle - puzzle to solve
+ *              dij - the dijkstra auxiliary struct
+ *              idx - destination node
+ *              stack - where the path is stored
+ * 
+ * Description: store a path between two points
+ *****************************************************************************/
+stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx)
+{
+  vec *dim = puzzle_getCityDimensions(puzzle);
+  stack_t *stack = stack_init();
+  puzzle_setPathCost(puzzle, puzzle_getPathCost(puzzle) + dij[idx]->cost);
+  while (dij[idx]->parent != -1)
+  {
+    stack = stack_put(stack, vec_idxToVec(dim, idx));
+    puzzle_setPathSteps(puzzle, puzzle_getPathSteps(puzzle) + 1);
+    idx = dij[idx]->parent;
+  }
+  return stack;
+}
+
+/******************************************************************************
+ * solution_printPath()
+ *
+ * Arguments:   puzzle - puzzle to solve
+ *              stack - where the path is stored
+ *              fp - the file to print in
+ * 
+ * Description: prints the shortest path for the problem
+ *****************************************************************************/
+void solution_printPath(puzzleInfo *puzzle, stack_t *path, FILE *fp)
+{
+  vec *pathStep;
+  while (path != NULL){
+    path = stack_get(path, (void*)&pathStep);
+    fprintf(fp, "%d %d %d\n",
+      vec_x(pathStep),
+      vec_y(pathStep),
+      puzzle_getTileCost(puzzle, pathStep)
+    );
+
+    free(pathStep);
+  }
 }
 
 /******************************************************************************
@@ -178,20 +242,19 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
  * 
  * Description: solves a puzzle of the 'A' problem type
  *****************************************************************************/
-void solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
+bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
 {
+  bool pathExists = false;
+
   // initializing a priority queue
   heap_t *priorityQueue = heap_initHeap();
   int startNode, endNode, node;
-
   // initializing the cost array and path tree
   vec *dim = puzzle_getCityDimensions(puzzle);
   startNode = vec_vecToIdx(dim, start);
   endNode = vec_vecToIdx(dim, end);
 
-  dij[startNode] = calloc(1, sizeof(vertex_t));
-  if (dij[startNode] == NULL)
-    exit(0);
+  dij[startNode] = calloc_check(1, sizeof(vertex_t));
 
   dij[startNode]->cost = 0;           // set the starting node's cost to zero
   dij[startNode]->outOfQueue = false; // set the queue condition
@@ -205,11 +268,16 @@ void solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
     dij[node]->outOfQueue = true;   // set it as being out of the queue
     // path found condition
     if (node == endNode)
+    {
+      pathExists = true;
       break;
+    }
     // put its neighbours in the queue and update it
     solution_updateQueue(puzzle, node, dij, &priorityQueue);
   }
-  if(heap_getCount(priorityQueue) == 0) printf("\nNão há caminho\n");
+
+  heap_free(priorityQueue);
+  return pathExists;
 }
 
 /******************************************************************************
@@ -225,17 +293,36 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
   vec *end = puzzle_getTouristicPoint(puzzle, 1);
   vec *dim = puzzle_getCityDimensions(puzzle);
 
-  vertex_t **dij = calloc(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
-  if (dij == NULL)
-    exit(0);
+  stack_t *path = NULL;
 
-  solution_dijkstra(puzzle, start, end, dij);
+  vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
 
-  // WRITE SOLUTION HERE
-  if(dij[vec_vecToIdx(dim,end)] != NULL)
-      printf("%d: cost %d, pai %d\n", vec_vecToIdx(dim,end) , dij[vec_vecToIdx(dim,end)]->cost, dij[vec_vecToIdx(dim,end)]->parent );
+  bool pathExists = solution_dijkstra(puzzle, start, end, dij);
+  if(pathExists == true)
+    path = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end));
+  else {
+    puzzle_setPathCost(puzzle, -1);
+    puzzle_setPathSteps(puzzle, 0);    
+  }
+
+  fprintf(fp, "%d %d %c %d %d %d\n",
+    vec_x(puzzle_getCityDimensions(puzzle)),
+    vec_y(puzzle_getCityDimensions(puzzle)), 
+    puzzle_getProblemType(puzzle),
+    puzzle_getNPoints(puzzle),
+    puzzle_getPathCost(puzzle),
+    puzzle_getPathSteps(puzzle)
+  );
+
+  if (pathExists == true)
+    solution_printPath(puzzle, path, fp);
+  fprintf(fp, "\n");
+
   
-  //free dos elementos no vetor
+
+  for (int i = 0; i < vec_x(dim) * vec_y(dim); i++) if (dij[i] != NULL && dij[i] != MADE_NO_CHANGE)
+      free(dij[i]);
+
   free(dij);
 }
 
@@ -248,6 +335,54 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
  *****************************************************************************/
 void solution_problemB(puzzleInfo *puzzle, FILE *fp)
 {
+  stack_t **path = calloc_check(puzzle_getNPoints(puzzle) - 1, sizeof(stack_t *));
+
+  bool pathExists;
+
+  vec *dim = puzzle_getCityDimensions(puzzle);
+  vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
+  for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+  {
+    vec *start = puzzle_getTouristicPoint(puzzle, i - 1); // the source
+    vec *end = puzzle_getTouristicPoint(puzzle, i); // the destination
+    pathExists = solution_dijkstra(puzzle, start, end, dij);  // apply dijkstra from start to end
+
+    if (pathExists == false)  // if one of the paths doesn't exist
+      break;
+
+    path[i - 1] = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end));  // store the path
+
+    for (int i = 0; i < vec_x(dim) * vec_y(dim); i++)
+    {
+      if (dij[i] != NULL && dij[i] != MADE_NO_CHANGE)
+        free(dij[i]);
+      dij[i] = NULL;
+    }
+  }
+  if(pathExists == false){
+    for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+      stack_free(path[i - 1], free);
+    puzzle_setPathCost(puzzle, -1);
+    puzzle_setPathSteps(puzzle, 0);    
+  }  
+
+  fprintf(fp, "%d %d %c %d %d %d\n",
+    vec_x(puzzle_getCityDimensions(puzzle)),
+    vec_y(puzzle_getCityDimensions(puzzle)), 
+    puzzle_getProblemType(puzzle),
+    puzzle_getNPoints(puzzle),
+    puzzle_getPathCost(puzzle),
+    puzzle_getPathSteps(puzzle)
+  );
+
+  if(pathExists == true){
+    for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+      solution_printPath(puzzle, path[i - 1], fp);
+  }
+  fprintf(fp, "\n");
+
+
+  free(dij);
 }
 /******************************************************************************
  * solution_problemC()

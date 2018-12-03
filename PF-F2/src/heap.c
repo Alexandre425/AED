@@ -1,15 +1,17 @@
 #include "heap.h"
 
-typedef struct{
+typedef struct
+{
   int nodeId;
   short priority; //retirar isto daqui e usar o dij
-}node;
+} node;
 
-typedef struct _heap{
+typedef struct _heap
+{
   node *array;
   int heapSize;
   int heapCount;
-}heap;
+} heap;
 
 /******************************************************************************
  * heap_initHeap()
@@ -19,9 +21,10 @@ typedef struct _heap{
  * Description: allocates a new heap
  *
  *****************************************************************************/
-heap* heap_initHeap(void){
-  heap *h = calloc(1, sizeof(heap)); if (h == NULL) exit(0);
-  h->array = calloc(HEAP_SIZE, sizeof(node)); if (h->array == NULL) exit(0);
+heap *heap_initHeap(void)
+{
+  heap *h = calloc_check(1, sizeof(heap));
+  h->array = calloc_check(HEAP_SIZE, sizeof(node));
   h->heapSize = HEAP_SIZE;
   h->heapCount = 0;
   return h;
@@ -36,7 +39,8 @@ heap* heap_initHeap(void){
  * Description: puts something in the heap and fixes it
  *
  *****************************************************************************/
-heap* heap_put(heap* h, int nodeId, short priority){
+heap *heap_put(heap *h, int nodeId, short priority)
+{
   // putting and fixing
   h->array[h->heapCount].nodeId = nodeId;
   h->array[h->heapCount].priority = priority;
@@ -56,7 +60,8 @@ heap* heap_put(heap* h, int nodeId, short priority){
  * Description: take a thing of the heap and fixes it
  *
  *****************************************************************************/
-int heap_get(heap* h){
+int heap_get(heap *h)
+{
   heap_exch(h, 0, --h->heapCount);
   heap_fixDown(h, 0);
   return h->array[h->heapCount].nodeId;
@@ -71,15 +76,17 @@ int heap_get(heap* h){
  * Description: update the heap after an update to the node priority
  *
  *****************************************************************************/
-void heap_update(heap* h, int nodeId, short newPriority ){
-  for(int i = 0; i < h->heapCount; i++){
-    if(nodeId == h->array[i].nodeId){
+void heap_update(heap *h, int nodeId, short newPriority)
+{
+  for (int i = 0; i < h->heapCount; i++)
+  {
+    if (nodeId == h->array[i].nodeId)
+    {
       h->array[i].priority = newPriority;
-      heap_fixUp(h,i);
+      heap_fixUp(h, i);
       return;
     }
   }
-
 }
 
 /******************************************************************************
@@ -91,10 +98,14 @@ void heap_update(heap* h, int nodeId, short newPriority ){
  *              in use (the item count equals the size)
  *
  *****************************************************************************/
-heap* heap_checkSize(heap* h){
-  if (h->heapCount == h->heapSize){
+heap *heap_checkSize(heap *h)
+{
+  if (h->heapCount == h->heapSize)
+  {
     h->heapSize += HEAP_SIZE;
-    h->array = realloc(h->array, h->heapSize * sizeof(node)); if (h->array == NULL) exit(0);
+    h->array = realloc(h->array, h->heapSize * sizeof(node));
+    if (h->array == NULL)
+      exit(0);
   }
   return h;
 }
@@ -110,7 +121,8 @@ heap* heap_checkSize(heap* h){
  *
  *****************************************************************************/
 
-void heap_exch(heap* h, int i, int j){
+void heap_exch(heap *h, int i, int j)
+{
   node tmp = h->array[i];
   h->array[i] = h->array[j];
   h->array[j] = tmp;
@@ -125,8 +137,10 @@ void heap_exch(heap* h, int i, int j){
  * Description: fixes the heap going up from the supplied index
  *
  *****************************************************************************/
-void heap_fixUp(heap* h, int i){
-  while (i > 0 && !less(h->array[parent(i)].priority, h->array[i].priority)){
+void heap_fixUp(heap *h, int i)
+{
+  while (i > 0 && !less(h->array[parent(i)].priority, h->array[i].priority))
+  {
     heap_exch(h, parent(i), i);
     i = parent(i);
   }
@@ -141,18 +155,20 @@ void heap_fixUp(heap* h, int i){
  * Description: fixes the heap going up from the supplied index
  *
  *****************************************************************************/
-void heap_fixDown(heap* h, int i){
+void heap_fixDown(heap *h, int i)
+{
   int idx = i;
   int child;
-  while (idx * 2 < h->heapCount - 1){
+  while (idx * 2 < h->heapCount - 1)
+  {
     child = childL(idx);
     // if the right child has higher priority
     // ensures the highest priority node will ascend to the local root
-    if (child < h->heapCount - 1 && less(h->array[child+1].priority, h->array[child].priority))
+    if (child < h->heapCount - 1 && less(h->array[child + 1].priority, h->array[child].priority))
       child++;
     // if the heap condition is verified (parent has higher priority)
     if (less(h->array[idx].priority, h->array[child].priority))
-      break;  // fix down is complete
+      break; // fix down is complete
     heap_exch(h, child, parent(child));
     idx = child;
   }
@@ -167,11 +183,10 @@ void heap_fixDown(heap* h, int i){
  * Description: fixes the heap going up from the supplied index
  *
  *****************************************************************************/
-int heap_getCount(heap* h)
+int heap_getCount(heap *h)
 {
   return h->heapCount;
 }
-
 
 /******************************************************************************
  * heap_free()
@@ -181,13 +196,14 @@ int heap_getCount(heap* h)
  * Description: frees the heap
  *
  *****************************************************************************/
-void heap_free(heap* h){
+void heap_free(heap *h)
+{
   free(h->array);
   free(h);
 }
 
-
-void heap_debugPrint(heap* h){
+void heap_debugPrint(heap *h)
+{
   printf("Size:  %d\n", h->heapSize);
   printf("Count: %d\n", h->heapCount);
   for (int i = 0; i < h->heapCount; i++)

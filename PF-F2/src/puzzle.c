@@ -2,16 +2,15 @@
 
 typedef struct _puzzleInfo
 {
-  char problemType;
-  int nPoints;
-  vec *cityDimensions;
-  vec **touristicPoints;
-  short **cityMap;
-  char *solution;
-  short valid;
+  char problemType;      // type of problem (A, B or C)
+  int nPoints;           // total of touristic points
+  vec *cityDimensions;   // city dimensions
+  vec **touristicPoints; // vector of all touristic points
+  short **cityMap;       // city map array
+  short valid;           // validity of the puzzle
+  short pathSteps;       // number of steps taken
+  short pathCost;        // total cost of the solution path
 } puzzleInfo;
-
-
 
 /******************************************************************************
  * puzzle_initPuzzle()
@@ -25,11 +24,7 @@ puzzleInfo *puzzle_initPuzzle()
 {
   puzzleInfo *puzzle = NULL;
 
-  puzzle = calloc(1, sizeof(puzzleInfo));
-  if (puzzle == NULL)
-  {
-    exit(0);
-  }
+  puzzle = calloc_check(1, sizeof(puzzleInfo));
   puzzle->cityDimensions = vec_create(-1, -1);
 
   return puzzle;
@@ -88,7 +83,7 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
 {
   int validation = 0;
   int i = 0;
-  
+
   // if the problem type is not an alphabetical character
   if ((puzzle->problemType < 'A' || puzzle->problemType > 'Z') &&
       (puzzle->problemType < 'a' || puzzle->problemType > 'z'))
@@ -121,20 +116,15 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
   if (validation == 0)
   {
     // allocate everything not allocated before (which was unnecessary for a validation check)
-    puzzle->touristicPoints = calloc(puzzle->nPoints, sizeof(vec **));
-    if (puzzle->touristicPoints == NULL) exit(0);
+    puzzle->touristicPoints = calloc_check(puzzle->nPoints, sizeof(vec **));
 
     for (i = 0; i < puzzle->nPoints; i++)
       puzzle->touristicPoints[i] = vec_create(-1, -1);
 
-    puzzle->cityMap = calloc(vec_x(puzzle->cityDimensions), sizeof(short *));
-    if (puzzle->cityMap == NULL) exit(0);
+    puzzle->cityMap = calloc_check(vec_x(puzzle->cityDimensions), sizeof(short *));
 
     for (i = 0; i < vec_x(puzzle->cityDimensions); i++)
-    {
-      puzzle->cityMap[i] = calloc(vec_y(puzzle->cityDimensions), sizeof(short));
-      if (puzzle->cityMap[i] == NULL) exit(0);
-    }
+      puzzle->cityMap[i] = calloc_check(vec_y(puzzle->cityDimensions), sizeof(short));
   }
 
   return validation;
@@ -179,6 +169,15 @@ void puzzle_setValidity(puzzleInfo *puzzle, short validity)
   puzzle->valid = validity;
 }
 
+void puzzle_setPathSteps(puzzleInfo *puzzle, short pathSteps)
+{
+  puzzle->pathSteps = pathSteps;
+}
+void puzzle_setPathCost(puzzleInfo *puzzle, short pathCost)
+{
+  puzzle->pathCost = pathCost;
+}
+
 /******************************************************************************
  * GETTING FUNCTIONS
  *
@@ -217,4 +216,14 @@ int puzzle_getTileCost(puzzleInfo *puzzle, vec *pos)
 short puzzle_getValidity(puzzleInfo *puzzle)
 {
   return puzzle->valid;
+}
+
+short puzzle_getPathSteps(puzzleInfo *puzzle)
+{
+  return puzzle->pathSteps;
+}
+
+short puzzle_getPathCost(puzzleInfo *puzzle)
+{
+  return puzzle->pathCost;
 }

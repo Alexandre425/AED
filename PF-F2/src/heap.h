@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include "vector.h"
+#include "utils.h"
 
 #define HEAP_SIZE 100
 #define childL(a) ((a*2)+1)
