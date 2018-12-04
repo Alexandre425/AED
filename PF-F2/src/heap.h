@@ -14,7 +14,7 @@ typedef struct _heap heap_t;
 typedef void* Item;
 
 // init and alloc
-heap_t* heap_initHeap(void);
+heap_t* heap_initHeap(int nIdx);
 heap_t* heap_checkSize(heap_t* h);
 
 // fix
@@ -24,6 +24,7 @@ void heap_fixUp(heap_t *h, int idx);
 // get
 int heap_get(heap_t *h);
 int heap_getCount(heap_t* h);
+int heap_getPriority(heap_t *h, int nodeId);
 
 // put
 heap_t* heap_put(heap_t *h, int nodeId, short priority);

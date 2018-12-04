@@ -3,12 +3,13 @@
 typedef struct
 {
   int nodeId;
-  short priority; //retirar isto daqui e usar o dij
+  short priority;
 } node;
 
 typedef struct _heap
 {
   node *array;
+  int *idxArray;
   int heapSize;
   int heapCount;
 } heap;
@@ -21,12 +22,15 @@ typedef struct _heap
  * Description: allocates a new heap
  *
  *****************************************************************************/
-heap *heap_initHeap(void)
+heap *heap_initHeap(int nIdx)
 {
   heap *h = calloc_check(1, sizeof(heap));
   h->array = calloc_check(HEAP_SIZE, sizeof(node));
   h->heapSize = HEAP_SIZE;
   h->heapCount = 0;
+  h->idxArray = malloc_check(nIdx, sizeof(int));
+  for(int i = 0; i < nIdx; i++ )
+    h->idxArray[i] = -1;
   return h;
 }
 
@@ -44,6 +48,7 @@ heap *heap_put(heap *h, int nodeId, short priority)
   // putting and fixing
   h->array[h->heapCount].nodeId = nodeId;
   h->array[h->heapCount].priority = priority;
+  h->idxArray[nodeId] = h->heapCount;
   heap_fixUp(h, h->heapCount);
   h->heapCount++;
 
@@ -78,16 +83,25 @@ int heap_get(heap *h)
  *****************************************************************************/
 void heap_update(heap *h, int nodeId, short newPriority)
 {
-  for (int i = 0; i < h->heapCount; i++)
-  {
-    if (nodeId == h->array[i].nodeId)
-    {
-      h->array[i].priority = newPriority;
-      heap_fixUp(h, i);
-      return;
-    }
-  }
+  h->array[h->idxArray[nodeId]].priority = newPriority;
+  heap_fixUp(h, h->idxArray[nodeId]);
 }
+
+/******************************************************************************
+ * heap_getPriority()
+ *
+ * Arguments:   h - the heap
+ *              nodeId - id of the node whose priority to return
+ * Returns:     priority - priority of the respective node
+ *              
+ * Description: returns the current priority of a node
+ *
+ *****************************************************************************/
+int heap_getPriority(heap *h, int nodeId)
+{
+  return h->array[h->idxArray[nodeId]].priority;
+}
+
 
 /******************************************************************************
  * heap_checkSize()
@@ -126,6 +140,10 @@ void heap_exch(heap *h, int i, int j)
   node tmp = h->array[i];
   h->array[i] = h->array[j];
   h->array[j] = tmp;
+
+  int tmp2 = h->idxArray[h->array[i].nodeId];
+  h->idxArray[h->array[i].nodeId] = h->idxArray[h->array[j].nodeId];
+  h->idxArray[h->array[j].nodeId] = tmp2;
 }
 
 /******************************************************************************

@@ -6,7 +6,6 @@ typedef struct vertex
 {
   bool outOfQueue;
   int parent;
-  int cost;
 } vertex_t;
 
 /******************************************************************************
@@ -128,6 +127,7 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
   vec *sum = vec_create(0, 0);
   vec *point = vec_idxToVec(puzzle_getCityDimensions(puzzle), idx);
   vec *dim = puzzle_getCityDimensions(puzzle);
+  int pointCost = heap_getPriority(*priorityQueue, idx);
 
   // if the point is not out of bounds or inaccessible
   if (solution_checkBounds(puzzle, point) == 0 &&
@@ -153,23 +153,23 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
           changedNothing = 0;
           dij[sumNode] = calloc_check(1, sizeof(vertex_t));
 
-          dij[sumNode]->parent = pointNode;                    // set its parent
-          dij[sumNode]->cost = newCost + dij[pointNode]->cost; // set its cost
-          dij[sumNode]->outOfQueue = false;                    // set the queue condition
+          dij[sumNode]->parent = pointNode;                           // set its parent
+          newCost = newCost + pointCost; // set its cost
+          dij[sumNode]->outOfQueue = false;                           // set the queue condition
 
-          *priorityQueue = heap_put(*priorityQueue, sumNode, dij[sumNode]->cost); // put it in the queue
+          *priorityQueue = heap_put(*priorityQueue, sumNode, newCost); // put it in the queue
         }
         // if it is in the queue already (and hasn't left already)
         // and the cost from the current parent is lower that the registered cost
         else if (dij[sumNode]->outOfQueue == false &&
-                 newCost + dij[pointNode]->cost < dij[sumNode]->cost)
+                 newCost + pointCost < heap_getPriority(*priorityQueue, sumNode))
         {
           changedNothing = 0;
 
           dij[sumNode]->parent = pointNode;                    // set its new parent
-          dij[sumNode]->cost = newCost + dij[pointNode]->cost; // set its new cost
+          newCost = newCost + pointCost;                      // set its new cost
 
-          heap_update(*priorityQueue, sumNode, dij[sumNode]->cost); // update the queue
+          heap_update(*priorityQueue, sumNode, newCost); // update the queue
         }
       }
     }
@@ -199,7 +199,6 @@ stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx)
 {
   vec *dim = puzzle_getCityDimensions(puzzle);
   stack_t *stack = stack_init();
-  puzzle_setPathCost(puzzle, puzzle_getPathCost(puzzle) + dij[idx]->cost);
   while (dij[idx]->parent != -1)
   {
     stack = stack_put(stack, vec_idxToVec(dim, idx));
@@ -221,13 +220,13 @@ stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx)
 void solution_printPath(puzzleInfo *puzzle, stack_t *path, FILE *fp)
 {
   vec *pathStep;
-  while (path != NULL){
-    path = stack_get(path, (void*)&pathStep);
+  while (path != NULL)
+  {
+    path = stack_get(path, (void *)&pathStep);
     fprintf(fp, "%d %d %d\n",
-      vec_x(pathStep),
-      vec_y(pathStep),
-      puzzle_getTileCost(puzzle, pathStep)
-    );
+            vec_x(pathStep),
+            vec_y(pathStep),
+            puzzle_getTileCost(puzzle, pathStep));
 
     free(pathStep);
   }
@@ -245,22 +244,22 @@ void solution_printPath(puzzleInfo *puzzle, stack_t *path, FILE *fp)
 bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
 {
   bool pathExists = false;
+  vec *dim = puzzle_getCityDimensions(puzzle);
 
   // initializing a priority queue
-  heap_t *priorityQueue = heap_initHeap();
-  int startNode, endNode, node;
+  heap_t *priorityQueue = heap_initHeap(vec_x(dim) * vec_y(dim));
+  int startNode, endNode, node, cost;
   // initializing the cost array and path tree
-  vec *dim = puzzle_getCityDimensions(puzzle);
   startNode = vec_vecToIdx(dim, start);
   endNode = vec_vecToIdx(dim, end);
 
   dij[startNode] = calloc_check(1, sizeof(vertex_t));
 
-  dij[startNode]->cost = 0;           // set the starting node's cost to zero
+  cost = 0;                           // set the starting node's cost to zero
   dij[startNode]->outOfQueue = false; // set the queue condition
   dij[startNode]->parent = -1;        // setting it as root
   // put the starting node in the queue
-  priorityQueue = heap_put(priorityQueue, startNode, dij[startNode]->cost);
+  priorityQueue = heap_put(priorityQueue, startNode, cost);
   // while the queue is not empty
   while (heap_getCount(priorityQueue) != 0)
   {
@@ -270,6 +269,7 @@ bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
     if (node == endNode)
     {
       pathExists = true;
+      puzzle_setPathCost(puzzle, puzzle_getPathCost(puzzle)+ heap_getPriority(priorityQueue, node));
       break;
     }
     // put its neighbours in the queue and update it
@@ -298,29 +298,28 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
   vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
 
   bool pathExists = solution_dijkstra(puzzle, start, end, dij);
-  if(pathExists == true)
+  if (pathExists == true)
     path = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end));
-  else {
+  else
+  {
     puzzle_setPathCost(puzzle, -1);
-    puzzle_setPathSteps(puzzle, 0);    
+    puzzle_setPathSteps(puzzle, 0);
   }
 
   fprintf(fp, "%d %d %c %d %d %d\n",
-    vec_x(puzzle_getCityDimensions(puzzle)),
-    vec_y(puzzle_getCityDimensions(puzzle)), 
-    puzzle_getProblemType(puzzle),
-    puzzle_getNPoints(puzzle),
-    puzzle_getPathCost(puzzle),
-    puzzle_getPathSteps(puzzle)
-  );
+          vec_x(puzzle_getCityDimensions(puzzle)),
+          vec_y(puzzle_getCityDimensions(puzzle)),
+          puzzle_getProblemType(puzzle),
+          puzzle_getNPoints(puzzle),
+          puzzle_getPathCost(puzzle),
+          puzzle_getPathSteps(puzzle));
 
   if (pathExists == true)
     solution_printPath(puzzle, path, fp);
   fprintf(fp, "\n");
 
-  
-
-  for (int i = 0; i < vec_x(dim) * vec_y(dim); i++) if (dij[i] != NULL && dij[i] != MADE_NO_CHANGE)
+  for (int i = 0; i < vec_x(dim) * vec_y(dim); i++)
+    if (dij[i] != NULL && dij[i] != MADE_NO_CHANGE)
       free(dij[i]);
 
   free(dij);
@@ -343,14 +342,14 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
   vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
   for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
   {
-    vec *start = puzzle_getTouristicPoint(puzzle, i - 1); // the source
-    vec *end = puzzle_getTouristicPoint(puzzle, i); // the destination
-    pathExists = solution_dijkstra(puzzle, start, end, dij);  // apply dijkstra from start to end
+    vec *start = puzzle_getTouristicPoint(puzzle, i - 1);    // the source
+    vec *end = puzzle_getTouristicPoint(puzzle, i);          // the destination
+    pathExists = solution_dijkstra(puzzle, start, end, dij); // apply dijkstra from start to end
 
-    if (pathExists == false)  // if one of the paths doesn't exist
+    if (pathExists == false) // if one of the paths doesn't exist
       break;
 
-    path[i - 1] = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end));  // store the path
+    path[i - 1] = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end)); // store the path
 
     for (int i = 0; i < vec_x(dim) * vec_y(dim); i++)
     {
@@ -359,28 +358,28 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
       dij[i] = NULL;
     }
   }
-  if(pathExists == false){
+  if (pathExists == false)
+  {
     for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
       stack_free(path[i - 1], free);
     puzzle_setPathCost(puzzle, -1);
-    puzzle_setPathSteps(puzzle, 0);    
-  }  
+    puzzle_setPathSteps(puzzle, 0);
+  }
 
   fprintf(fp, "%d %d %c %d %d %d\n",
-    vec_x(puzzle_getCityDimensions(puzzle)),
-    vec_y(puzzle_getCityDimensions(puzzle)), 
-    puzzle_getProblemType(puzzle),
-    puzzle_getNPoints(puzzle),
-    puzzle_getPathCost(puzzle),
-    puzzle_getPathSteps(puzzle)
-  );
+          vec_x(puzzle_getCityDimensions(puzzle)),
+          vec_y(puzzle_getCityDimensions(puzzle)),
+          puzzle_getProblemType(puzzle),
+          puzzle_getNPoints(puzzle),
+          puzzle_getPathCost(puzzle),
+          puzzle_getPathSteps(puzzle));
 
-  if(pathExists == true){
+  if (pathExists == true)
+  {
     for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
       solution_printPath(puzzle, path[i - 1], fp);
   }
   fprintf(fp, "\n");
-
 
   free(dij);
 }
