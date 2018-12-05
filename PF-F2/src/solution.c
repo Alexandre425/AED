@@ -442,7 +442,7 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
         vec *start = vec_idxToVec(dim, visiting);
         vec *end = vec_idxToVec(dim, i);
         vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *)); // alloc
-        solution_dijkstra(puzzle, start, end, dij);                                 // dijkstra
+        solution_dijkstra(puzzle, puzzle_getTouristicPoint(puzzle, visiting), puzzle_getTouristicPoint(puzzle, i), dij);                                 // dijkstra
         adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);                        // storing the cost
         adjMatrix[i][visiting] = solution_flipPath(puzzle, start, end, adjMatrix[visiting][i]);
         free(start); // free
