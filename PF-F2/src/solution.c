@@ -222,7 +222,7 @@ stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx)
  *
  * Arguments:   puzzle - puzzle to solve
  *              stack - where the path is stored
- *              fp - the file to print in
+ *              fp - the file to print in0 1
  * 
  * Description: prints the shortest path for the problem
  *****************************************************************************/
@@ -292,9 +292,9 @@ bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
 /******************************************************************************
  * solution_problemA()
  *
- * Arguments:   puzzle - puzzle to solve
- * 
- * Description: solves a puzzle of the 'A' problem type
+ * Arguments:   puzzle - puzzle to solve0 10 1
+ * 0 1
+ * Description: solves a puzzle of the 'A' problem type0 10 1
  *****************************************************************************/
 void solution_problemA(puzzleInfo *puzzle, FILE *fp)
 {
@@ -453,17 +453,18 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
         free(dij);
       }
       currCost += adjMatrix[visiting][i];
-      if (depth == puzzle_getNPoints(puzzle) && currCost < bestCost) // if all the points were visited (end of the line)
+      if (depth == puzzle_getNPoints(puzzle) - 1 && currCost < bestCost) // if all the points were visited (end of the line)
       {                                                              // and the current cost is better that the best one yet
         bestCost = currCost;                                         // update the best cost to the current one
         for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
           bestPath[j] = currPath[j];                                 // update the best path to the current one
       }
       solution_findBestCombination(puzzle, i);
-      depth--;
       currCost -= adjMatrix[visiting][i];
     }
   }
+  depth--;
+  //currPath[depth] = -1;
   visited[visiting] = false; // exiting the current point, freeing it up for future visits
 }
 
@@ -479,7 +480,7 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
   visited = calloc_check(puzzle_getNPoints(puzzle), sizeof(bool));
   adjMatrix = calloc_check(puzzle_getNPoints(puzzle), sizeof(int *));
   for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
-    adjMatrix[i] = calloc_check(puzzle_getNPoints, sizeof(int));
+    adjMatrix[i] = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
   bestCost = INT_MAX;
   currCost = 0;
   bestPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
@@ -488,4 +489,7 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
   depth = 0;
   for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
     solution_findBestCombination(puzzle, i);
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+    fprintf(stderr ,"%d\n", bestPath[i]);
+  fprintf(stderr ,"\n%d\n", bestCost);
 }
