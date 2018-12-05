@@ -8,6 +8,15 @@ typedef struct vertex
   int parent;
 } vertex_t;
 
+// variables for solving problem C
+bool *visited;
+int **adjMatrix;
+int bestCost;
+int currCost;
+int *bestPath;
+int *currPath;
+int depth;
+
 /******************************************************************************
  * solution_init()
  *
@@ -153,9 +162,9 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
           changedNothing = 0;
           dij[sumNode] = calloc_check(1, sizeof(vertex_t));
 
-          dij[sumNode]->parent = pointNode;                           // set its parent
-          newCost = newCost + pointCost; // set its cost
-          dij[sumNode]->outOfQueue = false;                           // set the queue condition
+          dij[sumNode]->parent = pointNode; // set its parent
+          newCost = newCost + pointCost;    // set its cost
+          dij[sumNode]->outOfQueue = false; // set the queue condition
 
           *priorityQueue = heap_put(*priorityQueue, sumNode, newCost); // put it in the queue
         }
@@ -166,8 +175,8 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
         {
           changedNothing = 0;
 
-          dij[sumNode]->parent = pointNode;                    // set its new parent
-          newCost = newCost + pointCost;                      // set its new cost
+          dij[sumNode]->parent = pointNode; // set its new parent
+          newCost = newCost + pointCost;    // set its new cost
 
           heap_update(*priorityQueue, sumNode, newCost); // update the queue
         }
@@ -269,7 +278,7 @@ bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
     if (node == endNode)
     {
       pathExists = true;
-      puzzle_setPathCost(puzzle, puzzle_getPathCost(puzzle)+ heap_getPriority(priorityQueue, node));
+      puzzle_setPathCost(puzzle, puzzle_getPathCost(puzzle) + heap_getPriority(priorityQueue, node));
       break;
     }
     // put its neighbours in the queue and update it
@@ -384,6 +393,81 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
   free(dij);
 }
 /******************************************************************************
+ * solution_flipPath()
+ *
+ * Arguments:   puzzle - puzzle to solve
+ *              a - starting point of the path
+ *              b - destination
+ *              cost - cost of the path from a to b
+ * 
+ * Returns:     cost - the new cost
+ * 
+ * Description: translates the cost from a path from a to b to the cost of a
+ *  path from b to a
+ *****************************************************************************/
+int solution_flipPath(puzzleInfo *puzzle, vec *a, vec *b, int cost)
+{
+  return (cost - puzzle_getTileCost(puzzle, b) + puzzle_getTileCost(puzzle, a));
+}
+
+/******************************************************************************
+ * solution_findBestCombination()
+ *
+ * Arguments:   puzzle - puzzle to solve
+ *              visited - array of points (tells if they are in the current path)
+ *              visiting - the index of the current point
+ *              adjMatrix - the adjacency matrix with the costs to and from touristic points
+ *              bestCost -  the best cost found yet
+ *              bestPath - the best path found yet
+ *              depth - how far into the path the algorithm is
+ * 
+ * Description: applies dijkstra between touristic points until an optimal
+ *              combination of visitation order has been found
+ *****************************************************************************/
+void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
+{
+  currPath[depth] = visiting;
+  depth++;
+  vec *dim = puzzle_getCityDimensions(puzzle);
+
+  visited[visiting] = true; // visited the current point
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+  {
+    if (visited[i] == false)
+    {                                  // find a point not visited in the current path yet
+      if (adjMatrix[visiting][i] == 0) // if the path cost is not defined
+      {
+        // calculate the cost
+        puzzle_setPathCost(puzzle, 0);
+        vec *start = vec_idxToVec(dim, visiting);
+        vec *end = vec_idxToVec(dim, i);
+        vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *)); // alloc
+        solution_dijkstra(puzzle, start, end, dij);                                 // dijkstra
+        adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);                        // storing the cost
+        adjMatrix[i][visiting] = solution_flipPath(puzzle, start, end, adjMatrix[visiting][i]);
+        free(start); // free
+        free(end);
+        for (int i = 0; i < vec_x(dim) * vec_y(dim); i++)
+          if (dij[i] != NULL && dij[i] != MADE_NO_CHANGE)
+            free(dij[i]);
+        free(dij);
+      }
+      currCost += adjMatrix[visiting][i];
+      if (depth == puzzle_getNPoints(puzzle) && currCost < bestCost) // if all the points were visited (end of the line)
+      {                                                              // and the current cost is better that the best one yet
+        bestCost = currCost;                                         // update the best cost to the current one
+        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+          bestPath[j] = currPath[j];                                 // update the best path to the current one
+      }
+      solution_findBestCombination(puzzle, i);
+      depth--;
+      currCost -= adjMatrix[visiting][i];
+    }
+  }
+  visited[visiting] = false; // exiting the current point, freeing it up for future visits
+}
+
+/******************************************************************************
  * solution_problemC()
  *
  * Arguments:   puzzle - puzzle to solve
@@ -392,4 +476,16 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
  *****************************************************************************/
 void solution_problemC(puzzleInfo *puzzle, FILE *fp)
 {
+  visited = calloc_check(puzzle_getNPoints(puzzle), sizeof(bool));
+  adjMatrix = calloc_check(puzzle_getNPoints(puzzle), sizeof(int *));
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+    adjMatrix[i] = calloc_check(puzzle_getNPoints, sizeof(int));
+  bestCost = INT_MAX;
+  currCost = 0;
+  bestPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+  currPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+  depth = 0;
+  depth = 0;
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+    solution_findBestCombination(puzzle, i);
 }

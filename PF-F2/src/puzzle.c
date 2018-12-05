@@ -94,7 +94,7 @@ int puzzle_paremetersCheck(puzzleInfo *puzzle)
   }
 
   // if it is a character, but not one corresponding to a problem type
-  else if ((puzzle->problemType != 'A') && (puzzle->problemType != 'B'))
+  else if ((puzzle->problemType != 'A') && (puzzle->problemType != 'B') && (puzzle->problemType != 'C'))
     // 1 -> an invalid puzzle, print accordingly
     validation = 1;
 
