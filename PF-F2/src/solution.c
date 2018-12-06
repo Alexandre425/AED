@@ -439,10 +439,10 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
       {
         // calculate the cost
         puzzle_setPathCost(puzzle, 0);
-        vec *start = vec_idxToVec(dim, visiting);
-        vec *end = vec_idxToVec(dim, i);
+        vec *start = puzzle_getTouristicPoint(puzzle, visiting);
+        vec *end = puzzle_getTouristicPoint(puzzle, i);
         vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *)); // alloc
-        solution_dijkstra(puzzle, puzzle_getTouristicPoint(puzzle, visiting), puzzle_getTouristicPoint(puzzle, i), dij);                                 // dijkstra
+        solution_dijkstra(puzzle, start, end, dij);                                 // dijkstra
         adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);                        // storing the cost
         adjMatrix[i][visiting] = solution_flipPath(puzzle, start, end, adjMatrix[visiting][i]);
         free(start); // free
@@ -453,39 +453,26 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
         free(dij);
       }
       currCost += adjMatrix[visiting][i];
-      if (depth == puzzle_getNPoints(puzzle)  && currCost < bestCost) // if all the points were visited (end of the line)
-      {                                                              // and the current cost is better that the best one yet
-        fprintf(stdout, "Visiting: %d\n", visiting);
-        fprintf(stdout, "Depth: %d\n", depth);
-        fprintf(stdout, "CurrCost: %d\n", currCost);
-        fprintf(stdout, "BestCost: %d\n", bestCost);
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-          fprintf(stdout, "%d ", currPath[j]);
-        fprintf(stdout, "\n");
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-          fprintf(stdout, "%d ", bestPath[i]);
-        fprintf(stdout, "\n");
-        bestCost = currCost;                                         // update the best cost to the current one
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-          bestPath[j] = currPath[j];                                 // update the best path to the current one
-      }
       solution_findBestCombination(puzzle, i);
       currCost -= adjMatrix[visiting][i];
     }
-    if(depth == puzzle_getNPoints(puzzle)  && currCost < bestCost){  // and the current cost is better that the best one yet
-        fprintf(stdout, "Visiting: %d\n", visiting);
-        fprintf(stdout, "Depth: %d\n", depth);
-        fprintf(stdout, "CurrCost: %d\n", currCost);
-        fprintf(stdout, "BestCost: %d\n", bestCost);
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-          fprintf(stdout, "%d ", currPath[j]);
-        fprintf(stdout, "\n");
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-          fprintf(stdout, "%d ", bestPath[i]);
-        fprintf(stdout, "\n");
-        bestCost = currCost;                                         // update the best cost to the current one
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+    if (depth == puzzle_getNPoints(puzzle) && i == 0){
+      /*fprintf(stdout, "Visiting: %d\n", visiting);
+      fprintf(stdout, "Depth: %d\n", depth);
+      fprintf(stdout, "CurrCost: %d\n", currCost);
+      fprintf(stdout, "BestCost: %d\n", bestCost);
+      for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+        fprintf(stdout, "%d ", currPath[j]);
+      fprintf(stdout, "\n");
+      for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+        fprintf(stdout, "%d ", bestPath[j]);
+      fprintf(stdout, "\n\n");*/
+      if (currCost < bestCost)
+      {  // and the current cost is better that the best one yet
+        bestCost = currCost;                                // update the best cost
+        for (int j = 0; j < puzzle_getNPoints(puzzle); j++) // update the best path
           bestPath[j] = currPath[j];          
+      }
     }
   }
   //currPath[depth] = -1;
@@ -514,6 +501,12 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
     depth = 0;
     solution_findBestCombination(puzzle, i);
   }
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
+    for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+      fprintf(stdout, "%d ", adjMatrix[i][j]);
+    fprintf(stdout, "\n");
+  }
+
   for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
     fprintf(stderr ,"%d\n", bestPath[i]);
   fprintf(stderr ,"\n%d\n", bestCost);
