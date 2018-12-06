@@ -282,9 +282,9 @@ bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
       break;
     }
     // put its neighbours in the queue and update it
-    solution_updateQueue(puzzle, node, dij, &priorityQueue);
+    else
+      solution_updateQueue(puzzle, node, dij, &priorityQueue);
   }
-
   heap_free(priorityQueue);
   return pathExists;
 }
@@ -442,40 +442,35 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
         vec *start = puzzle_getTouristicPoint(puzzle, visiting);
         vec *end = puzzle_getTouristicPoint(puzzle, i);
         vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *)); // alloc
-        solution_dijkstra(puzzle, start, end, dij);                                 // dijkstra
-        adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);                        // storing the cost
-        adjMatrix[i][visiting] = solution_flipPath(puzzle, start, end, adjMatrix[visiting][i]);
-        free(start); // free
-        free(end);
+        if(solution_dijkstra(puzzle, start, end, dij)){       // dijkstra
+          adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);// storing the cost
+          adjMatrix[i][visiting] = solution_flipPath(puzzle, start, end, adjMatrix[visiting][i]);
+        }
+        else{
+          adjMatrix[visiting][i] = -1;
+          adjMatrix[i][visiting] = -1;
+        }
         for (int j = 0; j < vec_x(dim) * vec_y(dim); j++)
           if (dij[j] != NULL && dij[j] != MADE_NO_CHANGE)
             free(dij[j]);
         free(dij);
       }
-      currCost += adjMatrix[visiting][i];
-      solution_findBestCombination(puzzle, i);
-      currCost -= adjMatrix[visiting][i];
+      if(adjMatrix[visiting][i] != -1){
+        currCost += adjMatrix[visiting][i];
+        if (currCost < bestCost)
+          solution_findBestCombination(puzzle, i);
+        currCost -= adjMatrix[visiting][i];
+      }
     }
     if (depth == puzzle_getNPoints(puzzle) && i == 0){
-      /*fprintf(stdout, "Visiting: %d\n", visiting);
-      fprintf(stdout, "Depth: %d\n", depth);
-      fprintf(stdout, "CurrCost: %d\n", currCost);
-      fprintf(stdout, "BestCost: %d\n", bestCost);
-      for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-        fprintf(stdout, "%d ", currPath[j]);
-      fprintf(stdout, "\n");
-      for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-        fprintf(stdout, "%d ", bestPath[j]);
-      fprintf(stdout, "\n\n");*/
-      if (currCost < bestCost)
-      {  // and the current cost is better that the best one yet
+      if (currCost < bestCost)                              // and the current cost is better that the best one yet
+      {  
         bestCost = currCost;                                // update the best cost
         for (int j = 0; j < puzzle_getNPoints(puzzle); j++) // update the best path
           bestPath[j] = currPath[j];          
       }
     }
   }
-  //currPath[depth] = -1;
   depth--;
   visited[visiting] = false; // exiting the current point, freeing it up for future visits
 }
@@ -497,17 +492,23 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
   currCost = 0;
   bestPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
   currPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+
+  //find solution 
   for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
     depth = 0;
     solution_findBestCombination(puzzle, i);
   }
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
-    for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
-      fprintf(stdout, "%d ", adjMatrix[i][j]);
-    fprintf(stdout, "\n");
+  //print
+  if(bestCost == INT_MAX){
+    puzzle_setPathSteps(puzzle, 0);
+    bestCost = -1;
   }
-
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
-    fprintf(stderr ,"%d\n", bestPath[i]);
-  fprintf(stderr ,"\n%d\n", bestCost);
+  fprintf(fp, "%d %d %c %d %d %d\n\n",
+          vec_x(puzzle_getCityDimensions(puzzle)),
+          vec_y(puzzle_getCityDimensions(puzzle)),
+          puzzle_getProblemType(puzzle),
+          puzzle_getNPoints(puzzle),
+          bestCost,
+          puzzle_getPathSteps(puzzle));
+  
 }
