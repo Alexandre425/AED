@@ -217,6 +217,7 @@ int heap_getCount(heap *h)
 void heap_free(heap *h)
 {
   free(h->array);
+  free(h->idxArray);
   free(h);
 }
 

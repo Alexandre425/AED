@@ -460,7 +460,7 @@ int VerifyHeap(Heap *h)
 
 void HeapSort(Heap *h)
 {
-  int top = h->n_elements -1 ;
+  int top = h->n_elements -1;
 
   Heapify(h);
 

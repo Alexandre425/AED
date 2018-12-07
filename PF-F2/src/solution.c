@@ -424,7 +424,7 @@ int solution_flipPath(puzzleInfo *puzzle, vec *a, vec *b, int cost)
  * Description: applies dijkstra between touristic points until an optimal
  *              combination of visitation order has been found
  *****************************************************************************/
-void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
+bool solution_findBestCombination(puzzleInfo *puzzle, int visiting)
 {
   currPath[depth] = visiting;
   depth++;
@@ -442,25 +442,26 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
         vec *start = puzzle_getTouristicPoint(puzzle, visiting);
         vec *end = puzzle_getTouristicPoint(puzzle, i);
         vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *)); // alloc
-        if(solution_dijkstra(puzzle, start, end, dij)){       // dijkstra
-          adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);// storing the cost
+        if(solution_dijkstra(puzzle, start, end, dij) == true){       // dijkstra
+          adjMatrix[visiting][i] = puzzle_getPathCost(puzzle); // storing the cost
           adjMatrix[i][visiting] = solution_flipPath(puzzle, start, end, adjMatrix[visiting][i]);
+
         }
         else{
           adjMatrix[visiting][i] = -1;
           adjMatrix[i][visiting] = -1;
+          return false; // return, no solution
         }
         for (int j = 0; j < vec_x(dim) * vec_y(dim); j++)
           if (dij[j] != NULL && dij[j] != MADE_NO_CHANGE)
             free(dij[j]);
         free(dij);
       }
-      if(adjMatrix[visiting][i] != -1){
-        currCost += adjMatrix[visiting][i];
-        if (currCost < bestCost)
-          solution_findBestCombination(puzzle, i);
-        currCost -= adjMatrix[visiting][i];
-      }
+      currCost += adjMatrix[visiting][i];
+      if (currCost < bestCost)
+        if (solution_findBestCombination(puzzle, i) == false)
+          return false;
+      currCost -= adjMatrix[visiting][i];
     }
     if (depth == puzzle_getNPoints(puzzle) && i == 0){
       if (currCost < bestCost)                              // and the current cost is better that the best one yet
@@ -473,6 +474,8 @@ void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
   }
   depth--;
   visited[visiting] = false; // exiting the current point, freeing it up for future visits
+
+  return true;
 }
 
 /******************************************************************************
@@ -496,13 +499,20 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
   //find solution 
   for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
     depth = 0;
-    solution_findBestCombination(puzzle, i);
+    if (!solution_findBestCombination(puzzle, i))
+      break;
   }
   //print
   if(bestCost == INT_MAX){
     puzzle_setPathSteps(puzzle, 0);
     bestCost = -1;
   }
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
+    for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+      fprintf(stdout, "%d\t", adjMatrix[i][j]);
+    fprintf(stdout, "\n");
+  }
+  fprintf(stdout, "\n");
   fprintf(fp, "%d %d %c %d %d %d\n\n",
           vec_x(puzzle_getCityDimensions(puzzle)),
           vec_y(puzzle_getCityDimensions(puzzle)),
@@ -511,4 +521,10 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
           bestCost,
           puzzle_getPathSteps(puzzle));
   
+  free(visited);
+  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+    free(adjMatrix[i]);
+  free(adjMatrix);
+  free(bestPath);
+  free(currPath);
 }

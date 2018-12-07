@@ -14,6 +14,7 @@ if __name__ == "__main__":
     #print(orgCost)
     if resCost[4] != orgCost[4]:
       if printed == 0:
+        print("\n")
         print("In files {} and {}".format(sys.argv[1], sys.argv[2]))
         printed = 1
       print("Solution {} doesnt match".format(i+1))

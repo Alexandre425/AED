@@ -26,6 +26,7 @@ void solution_solvePuzzle(puzzleInfo *puzzle, FILE *fpout);
 bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij);
 stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx);
 void solution_pathTraceback(puzzleInfo *puzzle, vertex_t *dij, int child, FILE *fp);
+bool solution_findBestCombination(puzzleInfo *puzzle, int visiting);
 void solution_problemA(puzzleInfo *puzzle, FILE *solutionFile);
 void solution_problemB(puzzleInfo *puzzle, FILE *solutionFile);
 void solution_problemC(puzzleInfo *puzzle, FILE *solutionFile);
