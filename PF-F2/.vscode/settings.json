@@ -2,5 +2,6 @@
     "files.associations": {
         "vector.h": "c",
         "vector": "cpp"
-    }
+    },
+    "python.pythonPath": "/usr/bin/python3"
 }

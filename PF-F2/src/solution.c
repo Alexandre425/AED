@@ -497,11 +497,10 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
   currPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
 
   //find solution 
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
-    depth = 0;
-    if (!solution_findBestCombination(puzzle, i))
-      break;
-  }
+  
+    solution_findBestCombination(puzzle, 0);
+    
+
   //print
   if(bestCost == INT_MAX){
     puzzle_setPathSteps(puzzle, 0);
