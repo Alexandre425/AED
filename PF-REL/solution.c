@@ -374,13 +374,14 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
  *****************************************************************************/
 void solution_problemB(puzzleInfo *puzzle, FILE *fp)
 {
-  stack_t **path = calloc_check(puzzle_getNPoints(puzzle) - 1, sizeof(stack_t *));
+  int nPoints = puzzle_getNPoints(puzzle);
+  stack_t **path = calloc_check(nPoints - 1, sizeof(stack_t *));
 
-  bool pathExists;
+  bool pathExists = false;
 
   vec *dim = puzzle_getCityDimensions(puzzle);
   vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
-  for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+  for (int i = 1; i < nPoints; i++)
   {
     vec *start = puzzle_getTouristicPoint(puzzle, i - 1);    // the source
     vec *end = puzzle_getTouristicPoint(puzzle, i);          // the destination
@@ -400,7 +401,7 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
   }
   if (pathExists == false)
   {
-    for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+    for (int i = 1; i < nPoints; i++)
       stack_free(path[i - 1], free);
     puzzle_setPathCost(puzzle, -1);
     puzzle_setPathSteps(puzzle, 0);
@@ -410,13 +411,13 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
           vec_x(puzzle_getCityDimensions(puzzle)),
           vec_y(puzzle_getCityDimensions(puzzle)),
           puzzle_getProblemType(puzzle),
-          puzzle_getNPoints(puzzle),
+          nPoints,
           puzzle_getPathCost(puzzle),
           puzzle_getPathSteps(puzzle));
 
   if (pathExists == true)
   {
-    for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+    for (int i = 1; i < nPoints; i++)
       path[i - 1] = solution_printPath(puzzle, path[i - 1], fp);
   }
   fprintf(fp, "\n");
@@ -460,9 +461,10 @@ bool solution_findBestCombination(puzzleInfo *puzzle, int visiting)
   currPath[depth] = visiting; // update the current path
   depth++;                    // increasing how deep we are into the path
   vec *dim = puzzle_getCityDimensions(puzzle);
+  int nPoints = puzzle_getNPoints(puzzle);
 
   visited[visiting] = true;                           // setting the current point as visited
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++) // for all points
+  for (int i = 0; i < nPoints; i++) // for all points
   {
     if (visited[i] == false) // if a point is not visited yet
     {
@@ -503,12 +505,12 @@ bool solution_findBestCombination(puzzleInfo *puzzle, int visiting)
           return false;                                       // if one of the iterations showed the problem is invalid, cascade return
       currCost -= adjMatrix[visiting][i];                     // decrementing the cost as we go back
     }
-    if (depth == puzzle_getNPoints(puzzle) && i == 0) // if all the points were visited
+    if (depth == nPoints && i == 0) // if all the points were visited
     {
       if (currCost < bestCost) // and the current cost is better that the best one yet
       {
         bestCost = currCost;                                // update the best cost
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++) // update the best path
+        for (int j = 0; j < nPoints; j++) // update the best path
           bestPath[j] = currPath[j];
       }
     }
@@ -527,18 +529,19 @@ bool solution_findBestCombination(puzzleInfo *puzzle, int visiting)
  *****************************************************************************/
 void solution_printProblemC(puzzleInfo *puzzle, FILE *fp){
   int pathSteps = 0;
-  for (int  i = 1; i < puzzle_getNPoints(puzzle); i++){
+  int nPoints = puzzle_getNPoints(puzzle);
+  for (int  i = 1; i < nPoints; i++){
     pathSteps += pathMatrix[bestPath[i-1]][bestPath[i]].pathSteps;
   }
   fprintf(fp, "%d %d %c %d %d %d\n",
           vec_x(puzzle_getCityDimensions(puzzle)),
           vec_y(puzzle_getCityDimensions(puzzle)),
           puzzle_getProblemType(puzzle),
-          puzzle_getNPoints(puzzle),
+          nPoints,
           bestCost,
           pathSteps);
 
-  for (int i = 1; i < puzzle_getNPoints(puzzle); i++){
+  for (int i = 1; i < nPoints; i++){
      pathMatrix[bestPath[i-1]][bestPath[i]].path = solution_printPath(puzzle, pathMatrix[bestPath[i-1]][bestPath[i]].path, fp);
   }
   fprintf(fp, "\n");
@@ -553,17 +556,18 @@ void solution_printProblemC(puzzleInfo *puzzle, FILE *fp){
 void solution_problemC(puzzleInfo *puzzle, FILE *fp)
 {
   // allocate all the necessary auxiliary structures
-  pathMatrix = calloc_check(puzzle_getNPoints(puzzle), sizeof(void*));
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
-    pathMatrix[i] = calloc_check(puzzle_getNPoints(puzzle), sizeof(path_t));
-  visited = calloc_check(puzzle_getNPoints(puzzle), sizeof(bool));
-  adjMatrix = calloc_check(puzzle_getNPoints(puzzle), sizeof(int *));
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
-    adjMatrix[i] = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+  int nPoints = puzzle_getNPoints(puzzle);
+  pathMatrix = calloc_check(nPoints, sizeof(void*));
+  for (int i = 0; i < nPoints; i++)
+    pathMatrix[i] = calloc_check(nPoints, sizeof(path_t));
+  visited = calloc_check(nPoints, sizeof(bool));
+  adjMatrix = calloc_check(nPoints, sizeof(int *));
+  for (int i = 0; i < nPoints; i++)
+    adjMatrix[i] = calloc_check(nPoints, sizeof(int));
   bestCost = INT_MAX;
   currCost = 0;
-  bestPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
-  currPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+  bestPath = calloc_check(nPoints, sizeof(int));
+  currPath = calloc_check(nPoints, sizeof(int));
 
   if (solution_findBestCombination(puzzle, 0) == false)
   { // if there is no path between any two points
@@ -574,11 +578,11 @@ void solution_problemC(puzzleInfo *puzzle, FILE *fp)
   solution_printProblemC(puzzle, fp);
   // free
   free(visited);
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+  for (int i = 0; i < nPoints; i++)
     free(adjMatrix[i]);
   free(adjMatrix);
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
-    for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+  for (int i = 0; i < nPoints; i++){
+    for (int j = 0; j < nPoints; j++)
       stack_free(pathMatrix[i][j].path, free);
     free(pathMatrix[i]);
   }

@@ -11,19 +11,19 @@ typedef struct vertex
 typedef struct path
 {
   int pathSteps;
-  stack_t *path; 
+  stack_t *path;
 } path_t;
 
 // variables for solving problem C
 // carrying these around as arguments or crowding a struct would make it more confusing
-path_t **pathMatrix;   // path between any two points
-bool *visited;         // indicates if a point is in the current path
-int **adjMatrix;       // the adjacency matrix between the touristic points
-int bestCost;          // the best cost found yet
-int currCost;          // the cost of the current path
-int *bestPath;         // the best path found yet
-int *currPath;         // the path currently being traversed
-int depth;             // how far into the path the algorithm is
+path_t **pathMatrix; // path between any two points
+bool *visited;       // indicates if a point is in the current path
+int **adjMatrix;     // the adjacency matrix between the touristic points
+int bestCost;        // the best cost found yet
+int currCost;        // the cost of the current path
+int *bestPath;       // the best path found yet
+int *currPath;       // the path currently being traversed
+int depth;           // how far into the path the algorithm is
 
 /******************************************************************************
  * solution_init()
@@ -193,8 +193,8 @@ void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **
     // if a point introduced nothing new to the SPT or queue
     if (changedNothing == 1)
     {
-      free(dij[idx]);
-      dij[idx] = MADE_NO_CHANGE;
+      //free(dij[idx]);
+      //dij[idx] = MADE_NO_CHANGE;
     }
   }
 
@@ -236,10 +236,11 @@ stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx)
  *****************************************************************************/
 stack_t *solution_storeInvertedPath(puzzleInfo *puzzle, vertex_t **dij, stack_t *stack, int idx)
 {
-  if (dij[idx]->parent != -1){
+  if (dij[idx]->parent != -1)
+  {
     vec *dim = puzzle_getCityDimensions(puzzle);
     idx = dij[idx]->parent;
-    
+
     stack = solution_storeInvertedPath(puzzle, dij, stack, idx);
     puzzle_setPathSteps(puzzle, puzzle_getPathSteps(puzzle) + 1);
     stack = stack_put(stack, vec_idxToVec(dim, idx));
@@ -281,20 +282,21 @@ stack_t *solution_printPath(puzzleInfo *puzzle, stack_t *path, FILE *fp)
  * 
  * Description: solves a puzzle of the 'A' problem type
  *****************************************************************************/
-bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
+bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec **targets, int *targetCost, int nTargets, vertex_t **dij)
 {
   bool pathExists = false;
   vec *dim = puzzle_getCityDimensions(puzzle);
 
   // initializing a priority queue
   heap_t *priorityQueue = heap_initHeap(vec_x(dim) * vec_y(dim));
-  int startNode, endNode, node, cost;
-  // initializing the cost array and path tree
+
+  int startNode, *targetNodes, node, cost;
   startNode = vec_vecToIdx(dim, start);
-  endNode = vec_vecToIdx(dim, end);
+  targetNodes = calloc_check(nTargets, sizeof(int));
+  for (int i = 0; i < nTargets; i++)
+    targetNodes[i] = vec_vecToIdx(dim, targets[i]);
 
   dij[startNode] = calloc_check(1, sizeof(vertex_t));
-
   cost = 0;                           // set the starting node's cost to zero
   dij[startNode]->outOfQueue = false; // set the queue condition
   dij[startNode]->parent = -1;        // setting it as root
@@ -305,16 +307,26 @@ bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij)
   {
     node = heap_get(priorityQueue); // get the element with highest priority
     dij[node]->outOfQueue = true;   // set it as being out of the queue
-    // path found condition
-    if (node == endNode)
+    bool foundAll = true;
+    for (int i = 0; i < nTargets; i++) // check if all the targets have been reached
     {
-      pathExists = true;
+      if (node == targetNodes[i]) // if the node is the same as a target
+      {
+        targetNodes[i] = -1; // set it as reached
+        if (nTargets != 1)   // used exclusively for variant C
+          targetCost[i] = heap_getPriority(priorityQueue, node);
+      }
+      if (targetNodes[i] != -1) // if any target is unreached
+        foundAll = false;
+    }
+    if (foundAll == true) // if all the targets have been reached
+    {
       puzzle_setPathCost(puzzle, puzzle_getPathCost(puzzle) + heap_getPriority(priorityQueue, node));
-      break;
+      pathExists = true;
+      break; // dijkstra is complete
     }
     // put its neighbours in the queue and update it
-    else
-      solution_updateQueue(puzzle, node, dij, &priorityQueue);
+    solution_updateQueue(puzzle, node, dij, &priorityQueue);
   }
   heap_free(priorityQueue);
   return pathExists;
@@ -337,7 +349,7 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
 
   vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
 
-  bool pathExists = solution_dijkstra(puzzle, start, end, dij);
+  bool pathExists = solution_dijkstra(puzzle, start, &end, NULL, 1, dij);
   if (pathExists == true)
     path = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end));
   else
@@ -374,17 +386,18 @@ void solution_problemA(puzzleInfo *puzzle, FILE *fp)
  *****************************************************************************/
 void solution_problemB(puzzleInfo *puzzle, FILE *fp)
 {
-  stack_t **path = calloc_check(puzzle_getNPoints(puzzle) - 1, sizeof(stack_t *));
+  int nPoints = puzzle_getNPoints(puzzle);
+  stack_t **path = calloc_check(nPoints - 1, sizeof(stack_t *));
 
-  bool pathExists;
+  bool pathExists = false;
 
   vec *dim = puzzle_getCityDimensions(puzzle);
   vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
-  for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+  for (int i = 1; i < nPoints; i++)
   {
-    vec *start = puzzle_getTouristicPoint(puzzle, i - 1);    // the source
-    vec *end = puzzle_getTouristicPoint(puzzle, i);          // the destination
-    pathExists = solution_dijkstra(puzzle, start, end, dij); // apply dijkstra from start to end
+    vec *start = puzzle_getTouristicPoint(puzzle, i - 1);              // the source
+    vec *end = puzzle_getTouristicPoint(puzzle, i);                    // the destination
+    pathExists = solution_dijkstra(puzzle, start, &end, NULL, 1, dij); // apply dijkstra from start to end
 
     if (pathExists == false) // if one of the paths doesn't exist
       break;
@@ -400,7 +413,7 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
   }
   if (pathExists == false)
   {
-    for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+    for (int i = 1; i < nPoints; i++)
       stack_free(path[i - 1], free);
     puzzle_setPathCost(puzzle, -1);
     puzzle_setPathSteps(puzzle, 0);
@@ -410,13 +423,13 @@ void solution_problemB(puzzleInfo *puzzle, FILE *fp)
           vec_x(puzzle_getCityDimensions(puzzle)),
           vec_y(puzzle_getCityDimensions(puzzle)),
           puzzle_getProblemType(puzzle),
-          puzzle_getNPoints(puzzle),
+          nPoints,
           puzzle_getPathCost(puzzle),
           puzzle_getPathSteps(puzzle));
 
   if (pathExists == true)
   {
-    for (int i = 1; i < puzzle_getNPoints(puzzle); i++)
+    for (int i = 1; i < nPoints; i++)
       path[i - 1] = solution_printPath(puzzle, path[i - 1], fp);
   }
   fprintf(fp, "\n");
@@ -455,68 +468,33 @@ int solution_flipPathCost(puzzleInfo *puzzle, vec *a, vec *b, int cost)
  * Description: applies dijkstra between touristic points until an optimal
  *              combination of visitation order has been found
  *****************************************************************************/
-bool solution_findBestCombination(puzzleInfo *puzzle, int visiting)
+void solution_findBestCombination(puzzleInfo *puzzle, int visiting)
 {
-  currPath[depth] = visiting; // update the current path
-  depth++;                    // increasing how deep we are into the path
-  vec *dim = puzzle_getCityDimensions(puzzle);
+  int nPoints = puzzle_getNPoints(puzzle);
+  currPath[depth++] = visiting;
+  visited[visiting] = true;
 
-  visited[visiting] = true;                           // setting the current point as visited
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++) // for all points
+  for (int i = 0; i < nPoints; i++) // for all points not visited
   {
-    if (visited[i] == false) // if a point is not visited yet
+    if (visited[i] == false)
     {
-      if (adjMatrix[visiting][i] == 0) // if the path cost is not defined
+      currCost += adjMatrix[visiting][i]; // increase the path cost
+      if (currCost < bestCost)  // if it is still better than the best one
       {
-        // calculate and store the cost
-        puzzle_setPathCost(puzzle, 0);
-        puzzle_setPathSteps(puzzle, 0);
-        vec *start = puzzle_getTouristicPoint(puzzle, visiting);
-        vec *end = puzzle_getTouristicPoint(puzzle, i);
-        vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *)); // alloc
-        if (solution_dijkstra(puzzle, start, end, dij) == true)                     // apply dijkstra
-        {                                                                           // if there is a solution
-          adjMatrix[visiting][i] = puzzle_getPathCost(puzzle);                      // store the cost
-          adjMatrix[i][visiting] = solution_flipPathCost(puzzle, start, end, adjMatrix[visiting][i]);
-          pathMatrix[visiting][i].path = solution_storePath(puzzle, dij, vec_vecToIdx(dim, end));
-          pathMatrix[visiting][i].pathSteps = puzzle_getPathSteps(puzzle);
-          puzzle_setPathSteps(puzzle, 0);
-          pathMatrix[i][visiting].path = solution_storeInvertedPath(puzzle, dij, NULL, vec_vecToIdx(dim, end));
-          pathMatrix[i][visiting].pathSteps = puzzle_getPathSteps(puzzle);
-        }
-        else // if there's no path between the two points
-        {
-          for (int j = 0; j < vec_x(dim) * vec_y(dim); j++)
-            if (dij[j] != NULL && dij[j] != MADE_NO_CHANGE)
-              free(dij[j]);
-          free(dij);
-          return false; // return, no solution
-        }
-        for (int j = 0; j < vec_x(dim) * vec_y(dim); j++)
-          if (dij[j] != NULL && dij[j] != MADE_NO_CHANGE)
-            free(dij[j]);
-        free(dij);
+        solution_findBestCombination(puzzle, i); // keep going
       }
-      currCost += adjMatrix[visiting][i];                     // incrementing the cost of the current path
-      if (currCost < bestCost)                                // if it's not more costly than the best path
-        if (solution_findBestCombination(puzzle, i) == false) // keep the recursion going
-          return false;                                       // if one of the iterations showed the problem is invalid, cascade return
-      currCost -= adjMatrix[visiting][i];                     // decrementing the cost as we go back
+      currCost -= adjMatrix[visiting][i]; // decrease the path cost as we return
     }
-    if (depth == puzzle_getNPoints(puzzle) && i == 0) // if all the points were visited
+    else if (depth == nPoints && currCost < bestCost)
     {
-      if (currCost < bestCost) // and the current cost is better that the best one yet
-      {
-        bestCost = currCost;                                // update the best cost
-        for (int j = 0; j < puzzle_getNPoints(puzzle); j++) // update the best path
-          bestPath[j] = currPath[j];
-      }
+      bestCost = currCost;
+      for (int j = 0; j < nPoints; j++)
+        bestPath[j] = currPath[j];
+      break;
     }
   }
-  depth--;                   // decreasing the depth as we backtrack
-  visited[visiting] = false; // exiting the current point, freeing it up for future visits
-
-  return true;
+  depth--;
+  visited[visiting] = false;    
 }
 /******************************************************************************
  * solution_printProblemC()
@@ -525,21 +503,27 @@ bool solution_findBestCombination(puzzleInfo *puzzle, int visiting)
  * 
  * Description: solves a puzzle of the 'C' problem type
  *****************************************************************************/
-void solution_printProblemC(puzzleInfo *puzzle, FILE *fp){
+void solution_printProblemC(puzzleInfo *puzzle, FILE *fp)
+{
+  int cost = 0;
   int pathSteps = 0;
-  for (int  i = 1; i < puzzle_getNPoints(puzzle); i++){
-    pathSteps += pathMatrix[bestPath[i-1]][bestPath[i]].pathSteps;
+  int nPoints = puzzle_getNPoints(puzzle);
+  for (int i = 1; i < nPoints; i++)
+  {
+    cost += adjMatrix[bestPath[i - 1]][bestPath[i]];
+    pathSteps += pathMatrix[bestPath[i - 1]][bestPath[i]].pathSteps;
   }
   fprintf(fp, "%d %d %c %d %d %d\n",
           vec_x(puzzle_getCityDimensions(puzzle)),
           vec_y(puzzle_getCityDimensions(puzzle)),
           puzzle_getProblemType(puzzle),
-          puzzle_getNPoints(puzzle),
-          bestCost,
+          nPoints,
+          cost,
           pathSteps);
 
-  for (int i = 1; i < puzzle_getNPoints(puzzle); i++){
-     pathMatrix[bestPath[i-1]][bestPath[i]].path = solution_printPath(puzzle, pathMatrix[bestPath[i-1]][bestPath[i]].path, fp);
+  for (int i = 1; i < nPoints; i++)
+  {
+    pathMatrix[bestPath[i - 1]][bestPath[i]].path = solution_printPath(puzzle, pathMatrix[bestPath[i - 1]][bestPath[i]].path, fp);
   }
   fprintf(fp, "\n");
 }
@@ -553,32 +537,79 @@ void solution_printProblemC(puzzleInfo *puzzle, FILE *fp){
 void solution_problemC(puzzleInfo *puzzle, FILE *fp)
 {
   // allocate all the necessary auxiliary structures
-  pathMatrix = calloc_check(puzzle_getNPoints(puzzle), sizeof(void*));
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
-    pathMatrix[i] = calloc_check(puzzle_getNPoints(puzzle), sizeof(path_t));
-  visited = calloc_check(puzzle_getNPoints(puzzle), sizeof(bool));
-  adjMatrix = calloc_check(puzzle_getNPoints(puzzle), sizeof(int *));
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
-    adjMatrix[i] = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+  vec *dim = puzzle_getCityDimensions(puzzle);
+  int nPoints = puzzle_getNPoints(puzzle);
+  pathMatrix = calloc_check(nPoints, sizeof(void *));
+  for (int i = 0; i < nPoints; i++)
+    pathMatrix[i] = calloc_check(nPoints, sizeof(path_t));
+  visited = calloc_check(nPoints, sizeof(bool));
+  adjMatrix = calloc_check(nPoints, sizeof(int *));
+  for (int i = 0; i < nPoints; i++)
+    adjMatrix[i] = calloc_check(nPoints, sizeof(int));
   bestCost = INT_MAX;
   currCost = 0;
-  bestPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
-  currPath = calloc_check(puzzle_getNPoints(puzzle), sizeof(int));
+  bestPath = calloc_check(nPoints, sizeof(int));
+  currPath = calloc_check(nPoints, sizeof(int));
+  bool pathExist = true;
 
-  if (solution_findBestCombination(puzzle, 0) == false)
-  { // if there is no path between any two points
-    puzzle_setPathSteps(puzzle, 0);
-    bestCost = -1;
+  for (int i = 0; i < nPoints - 1; i++)
+  {
+    int *targetCost = calloc_check(nPoints - (i+1), sizeof(int));
+    vec **targets = calloc_check(nPoints - (i+1), sizeof(vec *));
+    for (int j = i+1; j < nPoints; j++){
+      targets[j - (i+1)] = puzzle_getTouristicPoint(puzzle, j); // get the targets for dijkstra
+    }
+    vec *start = puzzle_getTouristicPoint(puzzle, i);
+    vertex_t **dij = calloc_check(vec_x(dim) * vec_y(dim), sizeof(vertex_t *));
+    if (solution_dijkstra(puzzle, start, targets, targetCost, nPoints - (i+1), dij) == true)
+    { // do dijkstra
+      for (int j = i+1; j < nPoints; j++){
+        // store the paths, costs and the adjacency matrix
+        adjMatrix[i][j] = targetCost[j - (i+1)];
+        adjMatrix[j][i] = solution_flipPathCost(puzzle, start, targets[j - (i+1)], adjMatrix[i][j]);
+        puzzle_setPathSteps(puzzle, 0);
+        pathMatrix[i][j].path = solution_storePath(puzzle, dij, vec_vecToIdx(dim, targets[j - (i+1)]));
+        pathMatrix[i][j].pathSteps = puzzle_getPathSteps(puzzle);
+        puzzle_setPathSteps(puzzle, 0);
+        pathMatrix[j][i].path = solution_storeInvertedPath(puzzle, dij, NULL, vec_vecToIdx(dim, targets[j - (i+1)]));
+        pathMatrix[j][i].pathSteps = puzzle_getPathSteps(puzzle);
+      }
+    }
+    else // if there is no path between any two points
+    {
+      pathExist = false;
+      break;
+    }
+    for (int n = 0; n < vec_x(dim) * vec_y(dim); n++)
+      free(dij[n]);
+    free(dij);
+
+    free(targetCost);
+    free(targets);
   }
-  //print
-  solution_printProblemC(puzzle, fp);
+  if(pathExist == true){
+    
+    solution_findBestCombination(puzzle, 0);
+    //print
+    solution_printProblemC(puzzle, fp);
+  }
+  else{
+    fprintf(fp, "%d %d %c %d %d %d\n",
+          vec_x(puzzle_getCityDimensions(puzzle)),
+          vec_y(puzzle_getCityDimensions(puzzle)),
+          puzzle_getProblemType(puzzle),
+          nPoints,
+          -1,
+          0);
+  }
   // free
   free(visited);
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++)
+  for (int i = 0; i < nPoints; i++)
     free(adjMatrix[i]);
   free(adjMatrix);
-  for (int i = 0; i < puzzle_getNPoints(puzzle); i++){
-    for (int j = 0; j < puzzle_getNPoints(puzzle); j++)
+  for (int i = 0; i < nPoints; i++)
+  {
+    for (int j = 0; j < nPoints; j++)
       stack_free(pathMatrix[i][j].path, free);
     free(pathMatrix[i]);
   }
