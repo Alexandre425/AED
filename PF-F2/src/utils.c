@@ -1,3 +1,18 @@
+/******************************************************************************
+ *
+ * File Name: utils.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    utils - varied utilities
+ *
+ *  DESCRIPTION
+ *		Implements simple, utilitarian functions like allocation wrappers
+ *
+ *****************************************************************************/
+
 #include "utils.h"
 
 void *calloc_check(int n_memb, size_t s_memb){

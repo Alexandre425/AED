@@ -1,12 +1,22 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "vector.h"
+/******************************************************************************
+ *
+ * File Name: main.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    Tourist Knights - pathfinding on a wheighted matrix
+ *
+ *  DESCRIPTION
+ *		AED project for the 2018 first semester. Solves 3 problems related to
+ *    pathfinding on a wheighted matrix. 
+ *
+ *****************************************************************************/
+
 #include "arguments.h"
-#include "puzzle.h"
 #include "file_manager.h"
-#include "solution.h"
-#include "heap.h"
+
 
 int main(int argc, char *argv[])
 {

@@ -1,4 +1,21 @@
+/******************************************************************************
+ *
+ * File Name: file_manager.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    file manager - input file reading 
+ *
+ *  DESCRIPTION
+ *		reads problems from an input file and calls the solving function
+ *
+ *****************************************************************************/
+
 #include "file_manager.h"
+
+extern vec *possibleMoves[8];
 
 /******************************************************************************
  * file_readPuzzles()
@@ -11,25 +28,27 @@
  *****************************************************************************/
 void file_readPuzzles(char *argv[])
 {
-    
+
   FILE *fpin = NULL, *fpout = NULL;
   char buffer[64];
   int num;
   int i = 0, j = 0;
-  puzzleInfo *puzzle = NULL; 
+  puzzleInfo *puzzle = NULL;
 
   fpin = fopen(argv[1], "r");
-  if (fpin == NULL){
+  if (fpin == NULL)
+  {
     exit(0);
   }
 
   fpout = solution_init(argv);
   puzzle = puzzle_initPuzzle();
 
-  while (fgets(buffer, 64, fpin) != NULL){
+  while (fgets(buffer, 64, fpin) != NULL)
+  {
     int x = -1, y = -1, nPoints = -1;
     char problemType = '\0';
-    sscanf(buffer,"%d %d %c %d", &x, &y, &problemType, &nPoints);
+    sscanf(buffer, "%d %d %c %d", &x, &y, &problemType, &nPoints);
     memset(buffer, 0, 64);
     puzzle_setCityDimensions(puzzle, x, y);
     puzzle_setProblemType(puzzle, problemType);
@@ -37,31 +56,69 @@ void file_readPuzzles(char *argv[])
     puzzle_setValidity(puzzle, puzzle_paremetersCheck(puzzle));
 
     /* if the puzzle is valid, read the touristic points and tile map */
-    if (puzzle_getValidity(puzzle) == 0){
+    if (puzzle_getValidity(puzzle) == 0)
+    {
       /* reading the touristic points */
-      for (i = 0; i < puzzle_getNPoints(puzzle); i++){
-        while (fscanf(fpin, "%d", &num) != 1);
+      for (i = 0; i < puzzle_getNPoints(puzzle); i++)
+      {
+        while (fscanf(fpin, "%d", &num) != 1)
+          ;
         x = num;
-        while (fscanf(fpin, "%d", &num) != 1);
+        while (fscanf(fpin, "%d", &num) != 1)
+          ;
         y = num;
         puzzle_setTouristicPoint(puzzle, i, x, y);
       }
 
       /* reading the tile map */
-      for (i = 0; i < vec_x(puzzle_getCityDimensions(puzzle)); i++){
-        for (j = 0; j < vec_y(puzzle_getCityDimensions(puzzle)); j++){
-          while (fscanf(fpin, "%d", &num) != 1);
+      for (i = 0; i < vec_x(puzzle_getCityDimensions(puzzle)); i++)
+      {
+        for (j = 0; j < vec_y(puzzle_getCityDimensions(puzzle)); j++)
+        {
+          while (fscanf(fpin, "%d", &num) != 1)
+            ;
           puzzle_setCityMapTile(puzzle, i, j, num);
         }
+      }
+
+      for (int i = 0; i < puzzle_getNPoints(puzzle); i++) // for all touristic points
+      {
+        int a, b;
+        if ((a = solution_checkBounds(puzzle, puzzle_getTouristicPoint(puzzle, i))) == -1 ||
+            (b = puzzle_getTileCost(puzzle, puzzle_getTouristicPoint(puzzle, i))) == 0)
+        {
+          puzzle_setValidity(puzzle, 1); // set as invalid if one is zero or OOB
+
+          break;
+        }
+
+        vec *sum = vec_create(0, 0);
+        bool foundAdj = false;
+        for (int j = 0; j < 8; j++) // for all adjacent points
+        {
+          vec_sum(sum, puzzle_getTouristicPoint(puzzle, i), possibleMoves[j]);
+          if (solution_checkBounds(puzzle, sum) == 0 &&
+              (puzzle_getTileCost(puzzle, sum)) != 0)
+          {
+            foundAdj = true; // if one is valid
+            break;
+          }
+        }
+        if (foundAdj == false) // if all adjacent points are invalid
+        {
+          puzzle_setValidity(puzzle, 1); // set as invalid
+          break;
+        }
+        free(sum);
       }
 
       solution_solvePuzzle(puzzle, fpout);
       puzzle_freePuzzle(puzzle);
       puzzle = puzzle_initPuzzle();
-      
     }
     // if the puzzle is invalid, write the solution (no more information needs to be read)
-    else if (puzzle_getValidity(puzzle) == 1){
+    else if (puzzle_getValidity(puzzle) == 1)
+    {
       solution_solvePuzzle(puzzle, fpout);
       puzzle_freePuzzle(puzzle);
       puzzle = puzzle_initPuzzle();
@@ -81,6 +138,7 @@ void file_readPuzzles(char *argv[])
  * Description: writes the solution to a puzzle to the solution file
  *
  *****************************************************************************/
-void file_writeSolution(char* solution, FILE* fp){
+void file_writeSolution(char *solution, FILE *fp)
+{
   fprintf(fp, "%s", solution);
 }

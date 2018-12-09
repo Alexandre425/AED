@@ -1,3 +1,20 @@
+/******************************************************************************
+ *
+ * File Name: puzzle.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    puzzle - puzzle storing and manipulation
+ *
+ *  DESCRIPTION
+ *		Implements functions to store and modify data about a puzzle structure,
+ *    defined below
+ *
+ *****************************************************************************/
+
+
 #include "puzzle.h"
 
 typedef struct _puzzleInfo
@@ -9,7 +26,6 @@ typedef struct _puzzleInfo
   short **cityMap;       // city map array
   short valid;           // validity of the puzzle
   short pathSteps;       // number of steps taken
-  short pathCost;        // total cost of the solution path
 } puzzleInfo;
 
 /******************************************************************************
@@ -173,10 +189,7 @@ void puzzle_setPathSteps(puzzleInfo *puzzle, short pathSteps)
 {
   puzzle->pathSteps = pathSteps;
 }
-void puzzle_setPathCost(puzzleInfo *puzzle, short pathCost)
-{
-  puzzle->pathCost = pathCost;
-}
+
 
 /******************************************************************************
  * GETTING FUNCTIONS
@@ -223,7 +236,3 @@ short puzzle_getPathSteps(puzzleInfo *puzzle)
   return puzzle->pathSteps;
 }
 
-short puzzle_getPathCost(puzzleInfo *puzzle)
-{
-  return puzzle->pathCost;
-}

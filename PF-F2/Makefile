@@ -2,7 +2,7 @@
 CC = gcc
 
 #flags for individual object file compilation
-CFLAGS = -Wall -std=c99 -g -pg
+CFLAGS = -Wall -std=c99 -O3
 #RELEASE
 # -Wall -std=c99 -O3
 #DEVELOPMENT

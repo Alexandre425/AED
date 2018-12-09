@@ -1,3 +1,19 @@
+/******************************************************************************
+ *
+ * File Name: stack.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    stack - stack implementation
+ *
+ *  DESCRIPTION
+ *		Implements functions to create and manipulate (FILO) stacks of pointers
+ *
+ *****************************************************************************/
+
+
 #include "stack.h"
 
 typedef struct _stack

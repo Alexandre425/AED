@@ -21,12 +21,12 @@ typedef struct vertex vertex_t;
 #define PATH_DOESNT_EXIST false
 
 /* pathfinding */
-bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec *end, vertex_t **dij);
+bool solution_dijkstra(puzzleInfo *puzzle, vec *start, vec **targets, int *targetCost, int nTargets, vertex_t **dij);
 void solution_updateQueue(puzzleInfo *puzzle, int idx, vertex_t **dij, heap_t **h);
 stack_t *solution_storePath(puzzleInfo *puzzle, vertex_t **dij, int idx);
 stack_t *solution_storeInvertedPath(puzzleInfo *puzzle, vertex_t **dij, stack_t *stack, int idx);
 void solution_pathTraceback(puzzleInfo *puzzle, vertex_t *dij, int child, FILE *fp);
-bool solution_findBestCombination(puzzleInfo *puzzle, int visiting);
+void solution_findBestCombination(puzzleInfo *puzzle, int visiting);
 
 /* solve */
 void solution_solvePuzzle(puzzleInfo *puzzle, FILE *fpout);

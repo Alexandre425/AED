@@ -1,3 +1,21 @@
+/******************************************************************************
+ *
+ * File Name: heap.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    heap - binary heap
+ *
+ *  DESCRIPTION
+ *		Implements functions that create and operate on a binary heap, used
+ *    as a priority queue. Lowest "priority value" means highest priority
+ *    in the queue.
+ *
+ *****************************************************************************/
+
+
 #include "heap.h"
 
 typedef struct

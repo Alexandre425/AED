@@ -25,7 +25,7 @@ void puzzle_setTouristicPoint(puzzleInfo *puzzle, int index, int x, int y);
 void puzzle_setCityMapTile(puzzleInfo *puzzle, int x_coord, int y_coord, short tileCost);
 void puzzle_setValidity(puzzleInfo *puzzle, short validity);
 void puzzle_setPathSteps(puzzleInfo *puzzle, short pathSteps);
-void puzzle_setPathCost(puzzleInfo *puzzle, short pathCost);
+
 
 /* get */
 char puzzle_getProblemType(puzzleInfo *puzzle);
@@ -34,6 +34,6 @@ vec *puzzle_getCityDimensions(puzzleInfo *puzzle);
 vec *puzzle_getTouristicPoint(puzzleInfo *puzzle, int index);
 int puzzle_getTileCost(puzzleInfo *puzzle, vec *position);
 short puzzle_getPathSteps(puzzleInfo *puzzle);
-short puzzle_getPathCost(puzzleInfo *puzzle);
+
 
 short puzzle_getValidity(puzzleInfo *puzzle);

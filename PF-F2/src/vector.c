@@ -1,3 +1,20 @@
+/******************************************************************************
+ *
+ * File Name: vector.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    vector - 2D vectors
+ *
+ *  DESCRIPTION
+ *		Implements functions to create and manipulate (operations like sum) two
+ *    dimentional vectors
+ *
+ *****************************************************************************/
+
+
 #include "vector.h"
 
 typedef struct _vec

@@ -1,3 +1,18 @@
+/******************************************************************************
+ *
+ * File Name: arguments.c
+ *
+ * Authors:    Alexandre Rodrigues
+ *             Aprígio Malveiro
+ *
+ *  NAME
+ *    arguments - argument checking
+ *
+ *  DESCRIPTION
+ *		implements a function to test the args with which the executable is called
+ *
+ *****************************************************************************/
+
 #include "arguments.h"
 
 /******************************************************************************

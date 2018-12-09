@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "utils.h"
 
-#define HEAP_SIZE 100
+#define HEAP_SIZE 200
 #define childL(a) ((a*2)+1)
 #define childR(a) ((a*2)+2)
 #define parent(a) ((a-1)/2)
